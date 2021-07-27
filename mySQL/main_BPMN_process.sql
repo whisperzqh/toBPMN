@@ -1,0 +1,16 @@
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (1, 'T00', 'Customer', 'Submit order to platform', 'Platform', 'task');
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (2, 'T01', 'Platform', 'Accept the order sent by Party A', null, 'task');
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (3, 'T02', 'Platform', 'Verify that the order is valid', null, 'exclusiveGateway');
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (4, 'T03', 'Platform', 'Submit payment documents to Party A', 'Customer', 'task');
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (5, 'T04', 'Customer', 'Receive payment doc', null, 'task');
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (6, 'T05', 'Customer', 'Verify payment doc', null, 'exclusiveGateway');
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (7, 'T06', 'Platform', 'Modify payment doc', null, 'task');
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (8, 'T07', 'Customer', 'Instalments to the platform', 'Platform', 'task');
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (9, 'T08', 'Customer', 'Full payment to the platform', 'Platform', 'task');
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (10, 'T09', 'Platform', 'Accept payment from Party A', 'Customer', 'task');
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (11, 'T10', 'Supplier', 'Deliver goods to Party A', 'Customer', 'task');
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (12, 'T11', 'Customer', 'Verify that the goods are received', null, 'exclusiveGateway');
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (13, 'T12', 'Customer', 'Accountability to the platform', 'Platform', 'task');
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (14, 'T13', 'Platform', 'Refund to Party A', 'Customer', 'task');
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (15, 'T14', 'Customer', 'Refunded by the platform', 'Platform', 'task');
+INSERT INTO BPMN_process (id, t_id, executor, action, recipient, type) VALUES (16, 'T15', 'Platform', 'Transfer the loan to Party B', 'Supplier', 'task');

@@ -1,0 +1,11 @@
+INSERT INTO BPMN_parameter (id, p_id, name, typr) VALUES (1, 'P00', 'first party', 'varchar');
+INSERT INTO BPMN_parameter (id, p_id, name, typr) VALUES (2, 'P01', 'Party B', 'varchar');
+INSERT INTO BPMN_parameter (id, p_id, name, typr) VALUES (3, 'P02', 'Order validation time limit', 'integer');
+INSERT INTO BPMN_parameter (id, p_id, name, typr) VALUES (4, 'P03', 'Party A''s account', 'varchar');
+INSERT INTO BPMN_parameter (id, p_id, name, typr) VALUES (5, 'P04', 'Account of Party B', 'varchar');
+INSERT INTO BPMN_parameter (id, p_id, name, typr) VALUES (6, 'P05', 'Party A''s address', 'varchar');
+INSERT INTO BPMN_parameter (id, p_id, name, typr) VALUES (7, 'P06', 'Address of Party B', 'varchar');
+INSERT INTO BPMN_parameter (id, p_id, name, typr) VALUES (8, 'P07', 'Transaction amount', 'integer');
+INSERT INTO BPMN_parameter (id, p_id, name, typr) VALUES (9, 'P08', 'Trading time', 'time');
+INSERT INTO BPMN_parameter (id, p_id, name, typr) VALUES (10, 'P09', 'Payment time limit', 'integer');
+INSERT INTO BPMN_parameter (id, p_id, name, typr) VALUES (11, 'P10', 'payment method', 'option');
