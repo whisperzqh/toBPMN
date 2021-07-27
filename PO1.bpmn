@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+  <bpmn2:process id="Process_1" isExecutable="false">
+    <bpmn2:startEvent id="StartEvent_1">
+      <bpmn2:outgoing>Flow_w06ehd2</bpmn2:outgoing>
+    </bpmn2:startEvent>
+    <bpmn2:task id="Activity_stez35x" name="Instalments to the platform">
+      <bpmn2:incoming>Flow_w06ehd2</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_n8qo66p</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Activity_e0qk9sg" name="Full payment to the platform">
+      <bpmn2:outgoing>Flow_tnkglh5</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Activity_rv24p5a" name="Accept payment from Party A">
+      <bpmn2:incoming>Flow_n8qo66p</bpmn2:incoming>
+      <bpmn2:incoming>Flow_tnkglh5</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_n2jz5at</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:endEvent id="Event_xqzy0rc">
+      <bpmn2:outgoing>Flow_n2jz5at</bpmn2:outgoing>
+    </bpmn2:endEvent>
+    <bpmn2:sequenceFlow id="Flow_w06ehd2" sourceRef="StartEvent_1" targetRef="Activity_stez35x" />
+    <bpmn2:sequenceFlow id="Flow_n8qo66p" name="hire purchase" sourceRef="Activity_stez35x" targetRef="Activity_rv24p5a" />
+    <bpmn2:sequenceFlow id="Flow_tnkglh5" name="Full payment" sourceRef="Activity_e0qk9sg" targetRef="Activity_rv24p5a" />
+    <bpmn2:sequenceFlow id="Flow_n2jz5at" sourceRef="Activity_rv24p5a" targetRef="Event_xqzy0rc" />
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_03bi9q3">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="60" y="82" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_stez35x_di" bpmnElement="Activity_stez35x">
+        <dc:Bounds x="260" y="60" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_e0qk9sg_di" bpmnElement="Activity_e0qk9sg">
+        <dc:Bounds x="460" y="60" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_rv24p5a_di" bpmnElement="Activity_rv24p5a">
+        <dc:Bounds x="660" y="60" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_xqzy0rc_di" bpmnElement="Event_xqzy0rc">
+        <dc:Bounds x="860" y="82" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_w06ehd2_di" bpmnElement="Flow_w06ehd2">
+        <di:waypoint x="96" y="100" />
+        <di:waypoint x="260" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_n8qo66p_di" bpmnElement="Flow_n8qo66p">
+        <di:waypoint x="360" y="100" />
+        <di:waypoint x="660" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_tnkglh5_di" bpmnElement="Flow_tnkglh5">
+        <di:waypoint x="560" y="100" />
+        <di:waypoint x="660" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_n2jz5at_di" bpmnElement="Flow_n2jz5at">
+        <di:waypoint x="760" y="100" />
+        <di:waypoint x="860" y="100" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>
