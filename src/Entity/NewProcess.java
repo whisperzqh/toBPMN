@@ -14,6 +14,7 @@ public class NewProcess {
     String type;//子流程 或 活动
     List<String> incomingList; //流入的顺序流id
     List<String> outgoingList; //流出的顺序流id
+    List<String> eventList;
     int x;
     int y;
     int width;
@@ -24,6 +25,7 @@ public class NewProcess {
         this.implementList = new ArrayList<>();
         this.incomingList = new ArrayList<>();
         this.outgoingList = new ArrayList<>();
+        this.eventList = new ArrayList<>();
     }
 
     public String getTid() {
@@ -136,5 +138,13 @@ public class NewProcess {
 
     public void setHeight(int height) {
         this.height = height;
+    }
+
+    public List<String> getEventList() {
+        return eventList;
+    }
+
+    public void setEventList(List<String> eventList) {
+        this.eventList = eventList;
     }
 }

@@ -17,6 +17,8 @@ public class SqliteTest
     public static List<Lane> LaneList = new ArrayList<>();
     public static List<NewProcess> newProcessList = new ArrayList<>();
     public static List<Sequence> SequenceList = new ArrayList<>();
+    public static List<Parameter> ParameterList = new ArrayList<>();
+    public static List<Event> EventList = new ArrayList<>();
     public static void main(String[] args) {
         try
         {
@@ -29,15 +31,37 @@ public class SqliteTest
             Statement stat = conn.createStatement();
             PreparedStatement preStat = null;
 
+            //parameter表
+            ResultSet rs = stat.executeQuery("select * from BPMN_parameter;");
+            while(rs.next()) {
+                Parameter parameter = new Parameter();
+                parameter.setPid(rs.getString("p_id"));
+                parameter.setName(rs.getString("name"));
+                parameter.setType(rs.getString("typr"));
+                ParameterList.add(parameter);
+            }
+
+            //event表
+            rs = stat.executeQuery("select * from BPMN_event;");
+            while (rs.next()){
+                Event event = new Event();
+                event.setE_id(rs.getString("e_id"));
+                event.setName(rs.getString("name"));
+                event.setDescription(rs.getString("description"));
+                String pid = rs.getString("process_id");
+                event.setProcess_id(new ArrayList<>(Arrays.asList(pid.split("、"))));
+                EventList.add(event);
+            }
+
             //subprocess表
-            ResultSet rs = stat.executeQuery("select * from BPMN_subprocess;"); //查询数据
+            rs = stat.executeQuery("select * from BPMN_subprocess;"); //查询数据
             while (rs.next()) {
                 SubProcess subProcess = new SubProcess();
                 subProcess.setSPid(rs.getString("sp_id"));
                 subProcess.setName(rs.getString("name"));
                 subProcess.setId("Activity_"+getRandomString());
                 String processId = rs.getString("process_id");
-                subProcess.setTidList(Arrays.asList(processId.split("、")));
+                subProcess.setTidList(new ArrayList<>(Arrays.asList(processId.split("、"))));
                 SubProcessList.add(subProcess);
             }
 
@@ -57,16 +81,20 @@ public class SqliteTest
                 newProcess.setTid(rs.getString("t_id"));
                 newProcess.setExecutor(rs.getString("executor"));
                 newProcess.setName(rs.getString("action"));
-                newProcess.setRecipient(rs.getString("recipient"));
-                newProcess.setType(rs.getString("type"));
-                if(newProcess.getType().equals("task")){
-                    newProcess.setWidth(100);
-                    newProcess.setHeight(80);
-                }
-                else if(newProcess.getType().equals("exclusiveGateway")){
-                    newProcess.setWidth(50);
-                    newProcess.setHeight(50);
-                }
+                //如果接收方为空 则接收方为执行方
+                if(isEmpty(rs.getString("recipient")))
+                    newProcess.setRecipient(rs.getString("executor"));
+                else newProcess.setRecipient(rs.getString("recipient"));
+                //730
+                newProcess.setType("task");
+//                if(newProcess.getType().equals("task")){
+                newProcess.setWidth(100);
+                newProcess.setHeight(80);
+//                }
+//                else if(newProcess.getType().equals("exclusiveGateway")){
+//                    newProcess.setWidth(50);
+//                    newProcess.setHeight(50);
+//                }
                 int id = rs.getInt("id"); //implement表里的process_id process表里的id
                 preStat = conn.prepareStatement("select implement_id from BPMN_process_execute where process_id = ?");
                 preStat.setInt(1,id);
@@ -84,8 +112,181 @@ public class SqliteTest
                     }
                 }
                 newProcess.setImplementList(implementList);
+                newProcessList.add(newProcess);
+            }
+
+            //给执行条件大于1的任务后面插入一个网关
+            int count =0;
+            for(int i=0;i< newProcessList.size();i++){
+                NewProcess newProcess = newProcessList.get(i);
+                //一个执行条件对应多个执行动作
+                if(newProcess.getType().equals("task")){
+                    List<Implement> implementList = newProcess.getImplementList();
+                    for(int j=0;j< implementList.size();j++){
+                        String action = implementList.get(j).getAction();
+                        String tid = "";
+                        int index = action.indexOf('/');
+                        if(index>=0){
+                            tid = action.substring(2,index);
+                            NewProcess gateway = new NewProcess();
+                            gateway.setTid("G"+count);
+                            gateway.setType("exclusiveGateway");
+                            gateway.setWidth(50);
+                            gateway.setHeight(50);
+                            gateway.setExecutor(newProcess.getRecipient());
+                            List<Implement> implementList1 = new ArrayList<>();
+                            Implement implement = new Implement();
+                            implement.setCondition(implementList.get(j).getCondition());
+                            implement.setAction(implementList.get(j).getAction());
+                            implementList1.add(implement);
+                            gateway.setImplementList(implementList1);
+                            count++;
+                            implementList.get(j).setAction("进行"+gateway.getTid());
+                            newProcessList.add(tidToIndex(tid),gateway);
+                            //判断是否要生成成对的网关
+                            int length = action.length();
+                            List<String> tidList = new ArrayList<>(Arrays.asList(action.substring(2,length).split("/")));
+                            String action1 = taskTidToObject(tidList.get(0)).getImplementList().get(0).getAction();
+                            int flag = 0;
+                            for(int k=0;k<tidList.size();k++){
+                                if(taskTidToObject(tidList.get(k)).getImplementList().size()!=1){
+                                    flag = 1;
+                                    break;
+                                }
+                                if(!taskTidToObject(tidList.get(k)).getImplementList().get(0).getAction().equals(action1)){
+                                    flag = 1;
+                                    break;
+                                }
+                            }
+                            NewProcess gateway1 = new NewProcess();
+                            if(flag==0){
+                                gateway1.setTid("G"+count);
+                                gateway1.setType("exclusiveGateway");
+                                gateway1.setWidth(50);
+                                gateway1.setHeight(50);
+                                gateway1.setExecutor(newProcess.getRecipient());
+                                List<Implement> implementList2 = new ArrayList<>();
+                                Implement implement2 = new Implement();
+                                implement2.setAction(taskTidToObject(tidList.get(0)).getImplementList().get(0).getAction());
+                                implement2.setCondition(taskTidToObject(tidList.get(0)).getImplementList().get(0).getCondition());
+                                implementList2.add(implement2);
+                                gateway1.setImplementList(implementList2);
+                                int length2 = taskTidToObject(tidList.get(0)).getImplementList().get(0).getAction().length();
+                                newProcessList.add(tidToIndex(taskTidToObject(tidList.get(0)).getImplementList().get(0).getAction().substring(2,length2)),gateway1);
+                                count++;
+                                for(int k=0;k<tidList.size();k++){
+                                    taskTidToObject(tidList.get(k)).getImplementList().get(0).setAction("进行"+gateway1.getTid());
+                                }
+                            }
+                            //查询当前任务是否属于某一个子流程 如果是 则生成的网关也要加入该子流程
+                            SubProcess subProcess = ifInSubProcess(tid);
+                            if(subProcess!=null){
+                                int index1 = subProcess.getTidList().indexOf(tid);
+                                subProcess.getTidList().add(index1,gateway.getTid());
+                                if(flag==0){
+                                    int index2 = subProcess.getTidList().indexOf(tidList.get(tidList.size()-1));
+                                    subProcess.getTidList().add(index2,gateway1.getTid());
+                                }
+                            }
+                        }
+                    }
+                }
+                //多个执行条件和动作
+                if(newProcess.getType().equals("task") && newProcess.getImplementList().size()>1){
+                    NewProcess gateway = new NewProcess();
+                    gateway.setTid("G"+count);
+                    gateway.setType("exclusiveGateway");
+                    gateway.setWidth(50);
+                    gateway.setHeight(50);
+                    gateway.setExecutor(newProcess.getRecipient());
+                    gateway.setImplementList(newProcess.getImplementList());
+                    count++;
+                    Implement implement = new Implement();
+                    implement.setCondition("");
+                    implement.setAction("进行"+gateway.getTid());
+                    List<Implement> list = new ArrayList<>();
+                    list.add(implement);
+                    newProcess.setImplementList(list);
+                    newProcessList.add(i+1,gateway);
+                    //判断是否要生成成对的网关
+                    List<String> tidList = new ArrayList<>();
+                    for(int k=0;k<newProcess.getImplementList().size();k++){
+                        int length3 = newProcess.getImplementList().get(k).getAction().length();
+                        tidList.add(newProcess.getImplementList().get(k).getAction().substring(2,length3));
+                    }
+                    String action1 = taskTidToObject(tidList.get(0)).getImplementList().get(0).getAction();
+                    int flag = 0;
+                    for(int k=0;k<tidList.size();k++){
+                        if(taskTidToObject(tidList.get(k)).getImplementList().size()!=1){
+                            flag = 1;
+                            break;
+                        }
+                        if(!taskTidToObject(tidList.get(k)).getImplementList().get(0).getAction().equals(action1)){
+                            flag = 1;
+                            break;
+                        }
+                    }
+                    NewProcess gateway1 = new NewProcess();
+                    if(flag==0){
+                        gateway1.setTid("G"+count);
+                        gateway1.setType("exclusiveGateway");
+                        gateway1.setWidth(50);
+                        gateway1.setHeight(50);
+                        gateway1.setExecutor(newProcess.getRecipient());
+                        List<Implement> implementList2 = new ArrayList<>();
+                        Implement implement2 = new Implement();
+                        implement2.setAction(taskTidToObject(tidList.get(0)).getImplementList().get(0).getAction());
+                        implement2.setCondition(taskTidToObject(tidList.get(0)).getImplementList().get(0).getCondition());
+                        implementList2.add(implement2);
+                        gateway1.setImplementList(implementList2);
+                        int length2 = taskTidToObject(tidList.get(0)).getImplementList().get(0).getAction().length();
+                        newProcessList.add(tidToIndex(taskTidToObject(tidList.get(0)).getImplementList().get(0).getAction().substring(2,length2)),gateway1);
+                        count++;
+                        for(int k=0;k<tidList.size();k++){
+                            taskTidToObject(tidList.get(k)).getImplementList().get(0).setAction("进行"+gateway1.getTid());
+                        }
+                    }
+
+                    //查询当前任务是否属于某一个子流程 如果是 则生成的网关也要加入该子流程
+                    SubProcess subProcess = ifInSubProcess(newProcess.getTid());
+                    if(subProcess!=null){
+                        int index = subProcess.getTidList().indexOf(newProcess.getTid());
+                        subProcess.getTidList().add(index+1,gateway.getTid());
+                        if(flag==0){
+                            int index2 = subProcess.getTidList().indexOf(tidList.get(tidList.size()-1));
+                            subProcess.getTidList().add(index2,gateway1.getTid());
+                        }
+                    }
+                }
+
+
+            }
+
+            //把event表赋值给对应的newProcessList元素
+            for(int i=0;i<EventList.size();i++){
+                for(int j=0;j<EventList.get(i).getProcess_id().size();j++){
+                    NewProcess newProcess = taskTidToObject(EventList.get(i).getProcess_id().get(j));
+                    newProcess.getEventList().add(EventList.get(i).getName());
+                }
+            }
+
+//            for (int i=0;i<newProcessList.size();i++){
+//                NewProcess newProcess1 = newProcessList.get(i);
+//                System.out.println(newProcess1.getTid()+" "+newProcess1.getName()+" "+newProcess1.getExecutor()+" "+newProcess1.getType());
+//                for(int j=0;j<newProcess1.getImplementList().size();j++){
+//                    System.out.println(newProcess1.getImplementList().get(j).getCondition()+" "+newProcess1.getImplementList().get(j).getAction());
+//                }
+//                for(int j=0;j<newProcess1.getEventList().size();j++){
+//                    System.out.println(newProcess1.getEventList().get(j));
+//                }
+//                System.out.println("---------------------------------------");
+//            }
+
+
+            for(int j=0;j< newProcessList.size();j++){
+                //730
                 //查询是否属于子流程
-                int flag = 0;
+                NewProcess newProcess = newProcessList.get(j);
                 for (int i = 0; i < SubProcessList.size(); i++){
                     SubProcess subProcess = SubProcessList.get(i);
                     if(subProcess.getTidList().contains(newProcess.getTid())){
@@ -96,6 +297,7 @@ public class SqliteTest
                             newProcess.setId("Gateway_"+getRandomString());
                         //如果属于某一个子流程 就加进子流程的newProcessList
                         subProcess.getNewProcessList().add(newProcess);
+                        newProcessList.remove(j);
                         if(subProcess.getTidList().get(0).equals(newProcess.getTid())){
                             //如果是某个子流程的第一个活动 就把子流程加入newProcessList
                             NewProcess subNewProcess = new NewProcess();
@@ -106,20 +308,15 @@ public class SqliteTest
                             subNewProcess.setExecutor(newProcess.getExecutor());
                             subNewProcess.setWidth(100);
                             subNewProcess.setHeight(80);
-                            newProcessList.add(subNewProcess);
+                            newProcessList.add(j,subNewProcess);
                         }
-                        flag = 1;
+                        j--;
                         break;
                     }
                 }
-                if(flag == 0){
-                    //如果不属于任意子流程
-//                    newProcess.setType("task");
-                    newProcessList.add(newProcess);
-//                    System.out.println(newProcess.getTid()+" "+newProcess.getName()+" "+newProcess.getExecutor()+" "+newProcess.getType());
-//                    System.out.println("--------------------");
-                }
             }
+
+
 //            for (int i=0;i<newProcessList.size();i++){
 //                NewProcess newProcess1 = newProcessList.get(i);
 //                System.out.println(newProcess1.getTid()+" "+newProcess1.getName()+" "+newProcess1.getExecutor()+" "+newProcess1.getType());
@@ -128,7 +325,7 @@ public class SqliteTest
 //                }
 //                System.out.println("---------------------------------------");
 //            }
-//
+////
 //            for (int i=0;i<SubProcessList.size();i++){
 //                SubProcess  newProcess1 = SubProcessList.get(i);
 //                System.out.println(newProcess1.getId()+" "+newProcess1.getName()+" "+newProcess1.getSPid()+" ");
@@ -164,19 +361,7 @@ public class SqliteTest
 
 
 
-//            for(int i=0;i<SubProcessList.size();i++){
-//                SubProcess s = SubProcessList.get(i);
-//                System.out.println(s.getSPid());
-//                for(int j=0;j<s.getNewProcessList().size();j++){
-//                    NewProcess newProcess1 = s.getNewProcessList().get(j);
-//                    System.out.println(newProcess1.getTid()+" "+newProcess1.getName()+" "+newProcess1.getExecutor()+" "+newProcess1.getType()+" "+newProcess1.getId()+" "+newProcess1.getLaneId());
-//                    for(int k=0;k<newProcess1.getImplementList().size();k++){
-//                        System.out.println(newProcess1.getImplementList().get(k).getCondition()+" "+newProcess1.getImplementList().get(k).getAction());
-//                    }
-//                    System.out.println("-----------------");
-//                }
-//                System.out.println("----------------------------------");
-//            }
+
 
             //填充总表中每个元素的泳道id 生成总表中每个元素的随机数id 修改总表中task的执行动作格式 补充泳道的元素id列表
             for(int i=0;i<newProcessList.size();i++){
@@ -194,7 +379,7 @@ public class SqliteTest
                             //判断执行动作是否属于子流程
                             if(!ifInNewProcess(action)){
                                 //不在总表中 替换为对应的子流程SPid
-                                action = ifInSubProcess(action);
+                                action = ifInSubProcess(action).getSPid();
                             }
                             process.getImplementList().get(j).setAction(action);
                         }
@@ -206,8 +391,12 @@ public class SqliteTest
                         process.setId("Gateway_"+getRandomString());
                 }
                 //在泳道类中填充元素的id列表
+//                if(getLaneIndex(process.getLaneId())==-1)
+//                    System.out.println(process.getTid()+process.getExecutor());
                 LaneList.get(getLaneIndex(process.getLaneId())).getElementIdList().add(process.getId());
             }
+
+
 
 
 //            for (int i=0;i<newProcessList.size();i++){
@@ -281,6 +470,21 @@ public class SqliteTest
 
             Output.printToFile(newProcessList,SequenceList,"PO",false);
 
+//            for(int i=0;i<SubProcessList.size();i++){
+//                SubProcess s = SubProcessList.get(i);
+//                System.out.println(s.getSPid());
+//                for(int j=0;j<s.getNewProcessList().size();j++){
+//                    NewProcess newProcess1 = s.getNewProcessList().get(j);
+//                    System.out.println(newProcess1.getTid()+" "+newProcess1.getName()+" "+newProcess1.getExecutor()+" "+newProcess1.getType()+" "+newProcess1.getId()+" "+newProcess1.getLaneId());
+//                    for(int k=0;k<newProcess1.getImplementList().size();k++){
+//                        System.out.println(newProcess1.getImplementList().get(k).getCondition()+" "+newProcess1.getImplementList().get(k).getAction());
+//                    }
+//                    System.out.println("-----------------");
+//                }
+//                System.out.println("----------------------------------");
+//            }
+
+
             //生成子流程的顺序流
             for(int m=0;m<SubProcessList.size();m++){
                 List<NewProcess> newProcessList = SubProcessList.get(m).getNewProcessList();
@@ -303,31 +507,35 @@ public class SqliteTest
                 for(int i=0;i< newProcessList.size();i++){
                     List<Implement> implementList = newProcessList.get(i).getImplementList();
                     for(int j=0;j<implementList.size();j++){
-                        Sequence sequence = new Sequence();
-                        sequence.setId("Flow_"+getRandomString());
-                        sequence.setName(implementList.get(j).getCondition());
-                        sequence.setSourceId(newProcessList.get(i).getId());
-                        newProcessList.get(i).getOutgoingList().add(sequence.getId());
-                        if(implementList.get(j).getAction().equals("结束")){
-                            NewProcess end = new NewProcess();
-                            end.setId("Event_"+getRandomString());
-                            end.setType("endEvent");
-                            end.getOutgoingList().add(sequence.getId());
-                            end.setHeight(36);
-                            end.setWidth(36);
-                            newProcessList.add(i+1,end);
-                            sequence.setTargetId(end.getId());
-                        }
-                        else{
-                            for(int n=0;n< newProcessList.size();n++){
-                                if(!isEmpty(newProcessList.get(n).getTid())&&newProcessList.get(n).getTid().equals(implementList.get(j).getAction())){
-                                    sequence.setTargetId(newProcessList.get(n).getId());
-                                    newProcessList.get(n).getIncomingList().add(sequence.getId());
-                                    break;
+                        List<String> actionList= new ArrayList<>(Arrays.asList(implementList.get(j).getAction().split("\\/")));
+                        for(int k = 0;k<actionList.size();k++){
+                            Sequence sequence = new Sequence();
+                            sequence.setId("Flow_"+getRandomString());
+                            sequence.setName(implementList.get(j).getCondition());
+                            sequence.setSourceId(newProcessList.get(i).getId());
+                            newProcessList.get(i).getOutgoingList().add(sequence.getId());
+                            if(actionList.get(k).equals("结束")){
+                                NewProcess end = new NewProcess();
+                                end.setId("Event_"+getRandomString());
+                                end.setType("endEvent");
+                                end.getOutgoingList().add(sequence.getId());
+                                end.setHeight(36);
+                                end.setWidth(36);
+                                newProcessList.add(i+1,end);
+                                sequence.setTargetId(end.getId());
+                            }
+                            else{
+                                for(int n=0;n< newProcessList.size();n++){
+                                    if(!isEmpty(newProcessList.get(n).getTid())&&newProcessList.get(n).getTid().equals(actionList.get(k))){
+                                        sequence.setTargetId(newProcessList.get(n).getId());
+                                        newProcessList.get(n).getIncomingList().add(sequence.getId());
+                                        break;
+                                    }
                                 }
                             }
+                            SequenceList.add(sequence);
                         }
-                        SequenceList.add(sequence);
+
                     }
                 }
                 Output.printToFile(newProcessList,SequenceList,"PO"+m,true);
@@ -366,7 +574,7 @@ public class SqliteTest
                     int length = action.length();
                     action = action.substring(2,length);
                     newProcessList1.get(i).getImplementList().get(j).setAction(action);
-                    list = Arrays.asList(action.split("\\/"));
+                    list = new ArrayList<>(Arrays.asList(action.split("\\/")));
                 }
 //                int tem = newProcessList1.get(i).getImplementList().get(j).getAction().length();
 //                List<String> list = Arrays.asList(newProcessList1.get(i).getImplementList().get(j).getAction().substring(2,tem).split("\\/"));
@@ -374,7 +582,7 @@ public class SqliteTest
                     if(!subProcess.getTidList().contains(list.get(k))){
                         //如果该tid不在本子流程内部的tid列表中，就判断是否在总表中，是否属于另一个子流程
                         if(!ifInNewProcess(list.get(k))){
-                            String SPid = ifInSubProcess(list.get(k));
+                            String SPid = ifInSubProcess(list.get(k)).getSPid();
                             if(SPid!=null){//SPid理论上不会为null
                                 //属于另一个子流程
                                 Implement implement = new Implement();
@@ -410,10 +618,10 @@ public class SqliteTest
     }
 
     //查询tid在哪个子流程中
-    public static String ifInSubProcess(String tid){
+    public static SubProcess ifInSubProcess(String tid){
         for (int i=0;i<SubProcessList.size();i++){
             if(SubProcessList.get(i).getTidList().contains(tid))
-                return SubProcessList.get(i).getSPid();
+                return SubProcessList.get(i);
         }
         return null;
     }
@@ -429,6 +637,7 @@ public class SqliteTest
 
     //由泳道id找到它在列表中的位置
     public static int getLaneIndex(String id){
+//        System.out.println(id);
         for(int i=0;i<LaneList.size();i++){
             if(LaneList.get(i).getId().equals(id))
                 return i;
@@ -444,6 +653,16 @@ public class SqliteTest
         }
         return null;//应该不会发生
     }
+
+    //根据Tid在总表中找到他的位置
+    public static int tidToIndex(String tid){
+        for(int i=0;i< newProcessList.size();i++){
+            if(!isEmpty(newProcessList.get(i).getTid())&&newProcessList.get(i).getTid().equals(tid))
+                return i;
+        }
+        return -1;//应该不会发生
+    }
+
 
     //判断总表中某属性是否为空
     public static boolean isEmpty(String item){

@@ -1,6 +1,7 @@
 import Entity.Lane;
 import Entity.NewProcess;
 import Entity.Sequence;
+import Entity.Parameter;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -58,9 +59,21 @@ public class Output {
 
     //collaboration
     public static String collaboration(){
-        return "  <bpmn2:collaboration id=\"Collaboration_03bi9q3\">\n" +
+        return "  <bpmn2:collaboration id=\"Collaboration_03bi9q3\" "+parameter()+">\n" +
                 "    <bpmn2:participant id=\"Participant_15oueic\" processRef=\"Process_1\" />\n" +
                 "  </bpmn2:collaboration>\n";
+    }
+
+    //parameter
+    public static String parameter(){
+        StringBuilder lines = new StringBuilder();
+        lines.append("Parameter=\"");
+        for(int i=0;i<SqliteTest.ParameterList.size();i++){
+            Parameter parameter = SqliteTest.ParameterList.get(i);
+            lines.append("@"+parameter.getName()+":"+parameter.getType()+"@;&#10;");
+        }
+        lines.append("\"");
+        return lines.toString();
     }
 
     //process
@@ -111,7 +124,14 @@ public class Output {
             NewProcess newProcess = newProcessList.get(i);
             lines.append("    <bpmn2:"+newProcess.getType()+" id=\""+newProcess.getId()+"\"");
             if(!isEmpty(newProcess.getName()))
-                lines.append(" name=\""+newProcess.getName()+"\"");
+                lines.append(" name=\""+newProcess.getName()+"\" ");
+            if(newProcess.getEventList().size()!=0){
+                lines.append("Event=\"");
+                for(int j=0;j<newProcess.getEventList().size();j++){
+                    lines.append("$"+newProcess.getEventList().get(j)+"$;");
+                }
+                lines.append("\"");
+            }
             lines.append(">\n");
             for(int j=0;j<newProcess.getIncomingList().size();j++)
                 lines.append("      <bpmn2:incoming>"+newProcess.getIncomingList().get(j)+"</bpmn2:incoming>\n");
@@ -207,17 +227,42 @@ public class Output {
             lines.append("      <bpmndi:BPMNEdge id=\""+sequence.getId()+"_di\" bpmnElement=\""+sequence.getId()+"\">\n");
             NewProcess source = elementIdToObject(sequence.getSourceId());
             NewProcess target = elementIdToObject(sequence.getTargetId());
-            int x = source.getX()+source.getWidth();
-            int y = source.getY()+ source.getHeight()/2;
-            lines.append("        <di:waypoint x=\""+x+"\" y=\""+y+"\" />\n");
-            x = target.getX();
-            y = target.getY()+ target.getHeight()/2;
-            lines.append("        <di:waypoint x=\""+x+"\" y=\""+y+"\" />\n");
-            lines.append("      </bpmndi:BPMNEdge>\n");
+            //如果source和target在同一个泳道 就左右连线
+            if(source.getLaneId().equals(target.getLaneId())){
+                int x = source.getX()+source.getWidth();
+                int y = source.getY()+ source.getHeight()/2;
+                lines.append("        <di:waypoint x=\""+x+"\" y=\""+y+"\" />\n");
+                x = target.getX();
+                y = target.getY()+ target.getHeight()/2;
+                lines.append("        <di:waypoint x=\""+x+"\" y=\""+y+"\" />\n");
+                lines.append("      </bpmndi:BPMNEdge>\n");
+            }
+            //如果不在一个泳道 就上下连线
+            else{
+                int targetIndex = laneIdToIndex(target.getLaneId());
+                int sourceIndex = laneIdToIndex(source.getLaneId());
+                if(sourceIndex<targetIndex){
+                    int x = source.getX()+source.getWidth()/2;
+                    int y = source.getY()+ source.getHeight();
+                    lines.append("        <di:waypoint x=\""+x+"\" y=\""+y+"\" />\n");
+                    x = target.getX()+target.getWidth()/2;
+                    y = target.getY();
+                    lines.append("        <di:waypoint x=\""+x+"\" y=\""+y+"\" />\n");
+                    lines.append("      </bpmndi:BPMNEdge>\n");
+                }
+                else{
+                    int x = source.getX()+source.getWidth()/2;
+                    int y = source.getY();
+                    lines.append("        <di:waypoint x=\""+x+"\" y=\""+y+"\" />\n");
+                    x = target.getX()+target.getWidth()/2;
+                    y = target.getY()+target.getHeight();
+                    lines.append("        <di:waypoint x=\""+x+"\" y=\""+y+"\" />\n");
+                    lines.append("      </bpmndi:BPMNEdge>\n");
+                }
+            }
         }
         return lines.toString();
     }
-
 
 
 
@@ -257,7 +302,7 @@ public class Output {
 //            lines.append("      </bpmndi:BPMNShape>\n");
 //        }
         lines.append(subElementPosition());
-        lines.append(edgePosition());
+        lines.append(subEdgePosition());
         lines.append("    </bpmndi:BPMNPlane>\n" +
                 "  </bpmndi:BPMNDiagram>\n");
         return lines.toString();
@@ -295,16 +340,41 @@ public class Output {
         return lines.toString();
     }
 
+    //subEdgePosition
+    public static String subEdgePosition(){
+        StringBuilder lines = new StringBuilder();
+        for(int i=0;i<SequenceList.size();i++){
+            Sequence sequence = SequenceList.get(i);
+            lines.append("      <bpmndi:BPMNEdge id=\""+sequence.getId()+"_di\" bpmnElement=\""+sequence.getId()+"\">\n");
+            NewProcess source = elementIdToObject(sequence.getSourceId());
+            NewProcess target = elementIdToObject(sequence.getTargetId());
+            int x = source.getX()+source.getWidth();
+            int y = source.getY()+ source.getHeight()/2;
+            lines.append("        <di:waypoint x=\""+x+"\" y=\""+y+"\" />\n");
+            x = target.getX();
+            y = target.getY()+ target.getHeight()/2;
+            lines.append("        <di:waypoint x=\""+x+"\" y=\""+y+"\" />\n");
+            lines.append("      </bpmndi:BPMNEdge>\n");
+        }
+        return lines.toString();
+    }
 
 
 
 
-
-
+    //根据泳道id找到它在泳道列表中的索引
+    public static int laneIdToIndex(String laneId){
+        for(int i=0;i<SqliteTest.LaneList.size();i++){
+            if(SqliteTest.LaneList.get(i).getId().equals(laneId))
+                return i;
+        }
+        return -1;//应该不会发生
+    }
 
 
     //根据随机数id在总表中查找该元素
     public static NewProcess elementIdToObject(String id){
+//        System.out.println(id);
         for(int i=0;i< newProcessList.size();i++){
             if(newProcessList.get(i).getId().equals(id))
                 return newProcessList.get(i);
