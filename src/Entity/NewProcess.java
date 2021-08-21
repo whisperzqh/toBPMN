@@ -19,6 +19,7 @@ public class NewProcess {
     int y;
     int width;
     int height;
+    List<String> preList;
 
 
     public NewProcess() {
@@ -26,6 +27,7 @@ public class NewProcess {
         this.incomingList = new ArrayList<>();
         this.outgoingList = new ArrayList<>();
         this.eventList = new ArrayList<>();
+        this.preList = new ArrayList<>();
     }
 
     public String getTid() {
@@ -146,5 +148,13 @@ public class NewProcess {
 
     public void setEventList(List<String> eventList) {
         this.eventList = eventList;
+    }
+
+    public List<String> getPreList() {
+        return preList;
+    }
+
+    public void setPreList(List<String> preList) {
+        this.preList = preList;
     }
 }

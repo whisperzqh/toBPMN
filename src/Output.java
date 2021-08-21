@@ -3,10 +3,7 @@ import Entity.NewProcess;
 import Entity.Sequence;
 import Entity.Parameter;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.List;
 
 public class Output {
@@ -22,6 +19,11 @@ public class Output {
         if(!file.exists()){
             file.createNewFile();
         }
+        //清空文件内容
+        FileWriter fileWriter =new FileWriter(file);
+        fileWriter.write("");
+        fileWriter.flush();
+        fileWriter.close();
 
         //引入输出流
         OutputStream outPutStream;
