@@ -4,22 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NewProcess {
-    String id;
-    String tid;//TXX 或 SPXX
+    String id;//数据库主键id
+    String tid;//TXX 或 SPXX 或 GXX
     String laneId;//所属泳道id
     String executor;//执行方
     String name;//执行行为action 即名字
     String recipient;//接收方
-    List<Implement> implementList;//对应的执行条件和执行行为
-    String type;//子流程 或 活动
+    List<Implement> implementList;//对应的执行条件和执行动作
+    String type;//子流程、任务、网关、事件
     List<String> incomingList; //流入的顺序流id
     List<String> outgoingList; //流出的顺序流id
-    List<String> eventList;
-    int x;
-    int y;
-    int width;
-    int height;
-    List<String> preList;
+    List<String> eventList;//属于该任务的事件列表
+    int x;//横坐标
+    int y;//纵坐标
+    int width;//元素的宽
+    int height;//元素的高
+    List<String> preList;//前置任务的Tid列表
 
 
     public NewProcess() {

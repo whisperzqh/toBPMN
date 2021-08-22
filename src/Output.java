@@ -13,7 +13,7 @@ public class Output {
     public static void printToFile(List<NewProcess> newProcessList1,List<Sequence> SequenceList1, String fileName, boolean ifSub) throws IOException {
         newProcessList = newProcessList1;
         SequenceList = SequenceList1;
-        String path = "C:\\Users\\zqh\\Desktop\\work\\toBPMN\\"+fileName+".bpmn";
+        String path = ".\\output\\"+fileName+".bpmn";
         File file = new File(path);
         //如果文件不存在，则自动生成文件；
         if(!file.exists()){
@@ -34,7 +34,6 @@ public class Output {
                 stringBuilder.append(total());//追加文件内容
             else
                 stringBuilder.append(subTotal());
-            //TODO 这里写你的代码逻辑;
 
             String context = stringBuilder.toString();//将可变字符串变为固定长度的字符串，方便下面的转码；
             byte[]  bytes = context.getBytes("UTF-8");//因为中文可能会乱码，这里使用了转码，转成UTF-8；
@@ -70,8 +69,8 @@ public class Output {
     public static String parameter(){
         StringBuilder lines = new StringBuilder();
         lines.append("Parameter=\"");
-        for(int i=0;i<SqliteTest.ParameterList.size();i++){
-            Parameter parameter = SqliteTest.ParameterList.get(i);
+        for(int i = 0; i< ToBPMN.ParameterList.size(); i++){
+            Parameter parameter = ToBPMN.ParameterList.get(i);
             lines.append("@"+parameter.getName()+":"+parameter.getType()+"@;&#10;");
         }
         lines.append("\"");
@@ -96,8 +95,8 @@ public class Output {
         StringBuilder lines = new StringBuilder();
         String begin = "    <bpmn2:laneSet id=\"LaneSet_109303u\">\n";
         lines.append(begin);
-        for(int i=0;i<SqliteTest.LaneList.size();i++){
-            String laneString = lane(SqliteTest.LaneList.get(i));
+        for(int i = 0; i< ToBPMN.LaneList.size(); i++){
+            String laneString = lane(ToBPMN.LaneList.get(i));
             lines.append(laneString);
         }
         String end = "    </bpmn2:laneSet>\n";
@@ -160,14 +159,23 @@ public class Output {
     //position
     public static String position(){
         StringBuilder lines = new StringBuilder();
+        int count = 0;
+        for(int i = 0; i< ToBPMN.LaneList.size(); i++){
+            int size = ToBPMN.LaneList.get(i).getElementIdList().size();
+            if (count < size){
+                count = size;
+            }
+        }
+        int width = 200*(count + 1) + 30;
+        int widthLane = width - 30;
         lines.append("  <bpmndi:BPMNDiagram id=\"BPMNDiagram_1\">\n" +
                 "    <bpmndi:BPMNPlane id=\"BPMNPlane_1\" bpmnElement=\"Collaboration_03bi9q3\">\n" +
                 "      <bpmndi:BPMNShape id=\"Participant_15oueic_di\" bpmnElement=\"Participant_15oueic\" isHorizontal=\"true\">\n" +
-                "        <dc:Bounds x=\"0\" y=\"0\" width=\"1830\" height=\""+200*SqliteTest.LaneList.size()+"\" />\n" +
+                "        <dc:Bounds x=\"0\" y=\"0\" width=\""+width+"\" height=\""+200* ToBPMN.LaneList.size()+"\" />\n" +
                 "      </bpmndi:BPMNShape>\n");
-        for(int i=0;i<SqliteTest.LaneList.size();i++){
-            lines.append("      <bpmndi:BPMNShape id=\""+SqliteTest.LaneList.get(i).getId()+"_di\" bpmnElement=\""+SqliteTest.LaneList.get(i).getId()+"\" isHorizontal=\"true\">\n");
-            lines.append("        <dc:Bounds x=\"30\" y=\""+i*200+"\" width=\"1800\" height=\"200\" />\n");
+        for(int i = 0; i< ToBPMN.LaneList.size(); i++){
+            lines.append("      <bpmndi:BPMNShape id=\""+ ToBPMN.LaneList.get(i).getId()+"_di\" bpmnElement=\""+ ToBPMN.LaneList.get(i).getId()+"\" isHorizontal=\"true\">\n");
+            lines.append("        <dc:Bounds x=\"30\" y=\""+i*200+"\" width=\""+widthLane+"\" height=\"200\" />\n");
             lines.append("      </bpmndi:BPMNShape>\n");
         }
         lines.append(elementPosition());
@@ -180,8 +188,8 @@ public class Output {
     //elementPosition
     public static String elementPosition(){
         StringBuilder lines = new StringBuilder();
-        for(int i=0;i<SqliteTest.LaneList.size();i++){
-            List<String> elementIdList = SqliteTest.LaneList.get(i).getElementIdList();
+        for(int i = 0; i< ToBPMN.LaneList.size(); i++){
+            List<String> elementIdList = ToBPMN.LaneList.get(i).getElementIdList();
             int flag = 0;
             //count用于控制第一个泳道除开始外的元素从280开始 其余泳道从280开始
             int count = 0;
@@ -298,11 +306,6 @@ public class Output {
         StringBuilder lines = new StringBuilder();
         lines.append("  <bpmndi:BPMNDiagram id=\"BPMNDiagram_1\">\n" +
                 "    <bpmndi:BPMNPlane id=\"BPMNPlane_1\" bpmnElement=\"Collaboration_03bi9q3\">\n");
-//        for(int i=0;i< newProcessList.size();i++){
-//            lines.append("      <bpmndi:BPMNShape id=\""+newProcessList.get(i).getId()+"_di\" bpmnElement=\""+newProcessList.get(i).getId()+"\" isHorizontal=\"true\">\n");
-//            lines.append("        <dc:Bounds x=\""++"\" y=\""+i*200+"\" width=\""+newProcessList.get(i).getWidth()+"\" height=\""+newProcessList.get(i).getHeight()+"\" />\n");
-//            lines.append("      </bpmndi:BPMNShape>\n");
-//        }
         lines.append(subElementPosition());
         lines.append(subEdgePosition());
         lines.append("    </bpmndi:BPMNPlane>\n" +
@@ -366,8 +369,8 @@ public class Output {
 
     //根据泳道id找到它在泳道列表中的索引
     public static int laneIdToIndex(String laneId){
-        for(int i=0;i<SqliteTest.LaneList.size();i++){
-            if(SqliteTest.LaneList.get(i).getId().equals(laneId))
+        for(int i = 0; i< ToBPMN.LaneList.size(); i++){
+            if(ToBPMN.LaneList.get(i).getId().equals(laneId))
                 return i;
         }
         return -1;//应该不会发生
@@ -376,7 +379,6 @@ public class Output {
 
     //根据随机数id在总表中查找该元素
     public static NewProcess elementIdToObject(String id){
-//        System.out.println(id);
         for(int i=0;i< newProcessList.size();i++){
             if(newProcessList.get(i).getId().equals(id))
                 return newProcessList.get(i);

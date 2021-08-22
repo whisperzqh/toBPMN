@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Lane {
-    String id;
-    String name;
+    String id;//数据库主键id
+    String name;//泳道名称
     List<String> elementIdList; //内部元素的id
-    int x; //坐标
-    int y;
+    int x; //横坐标
+    int y;//纵坐标
 
     public Lane() {
         this.elementIdList = new ArrayList<>();

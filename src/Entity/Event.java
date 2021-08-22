@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Event {
-    String e_id;
-    String name;
-    String description;
-    List<String> process_id;
+    String e_id;//事件ID
+    String name;//事件名
+    String description;//事件注释
+    List<String> process_id;//事件所属任务ID
 
     public Event() {
         this.process_id = new ArrayList<>();

@@ -1,9 +1,9 @@
 package Entity;
 
 public class Parameter {
-    String pid;
-    String name;
-    String type;
+    String pid;//参数ID
+    String name;//参数名
+    String type;//参数类型，如字符串、整型
 
     public String getPid() {
         return pid;

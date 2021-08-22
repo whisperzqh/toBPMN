@@ -1,10 +1,10 @@
 package Entity;
 
 public class Sequence {
-    String id;
-    String name;
-    String sourceId;
-    String targetId;
+    String id;//顺序流的随机数id
+    String name;//顺序流的名称
+    String sourceId;//顺序流的源任务id
+    String targetId;//顺序流的目标任务id
 
     public String getId() {
         return id;

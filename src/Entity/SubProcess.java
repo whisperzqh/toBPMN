@@ -4,17 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SubProcess {
-    String id;
-    String name;
+    String id;//数据库主键id
+    String name;//子流程名称
     String SPid; //子流程id SPXX
-    String type; //类型 即子流程
-    List<String> tidList; //对应的tid list
-    List<Element> elementList; //流程表里对应tid所在行的list
-    List<NewProcess> newProcessList;
+    List<String> tidList; //属于该子流程的任务对应的tid的list
+    List<NewProcess> newProcessList;//属于该子流程的任务对应的NewProcess对象的list
     String laneId; //所属泳道id
-    List<Implement> implementList;
-//    String condition; //执行条件
-//    String action; //执行动作
+    List<Implement> implementList;//对应的执行条件和执行动作
+
 
     public SubProcess() {
         this.newProcessList = new ArrayList<>();
@@ -48,28 +45,12 @@ public class SubProcess {
         this.SPid = SPid;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public List<String> getTidList() {
         return tidList;
     }
 
     public void setTidList(List<String> tidList) {
         this.tidList = tidList;
-    }
-
-    public List<Element> getElementList() {
-        return elementList;
-    }
-
-    public void setElementList(List<Element> elementList) {
-        this.elementList = elementList;
     }
 
     public String getLaneId() {
