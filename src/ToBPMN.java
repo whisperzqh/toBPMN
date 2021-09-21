@@ -12,18 +12,35 @@ import Entity.*;
  */
 public class ToBPMN
 {
-    public static List<SubProcess> SubProcessList = new ArrayList<>();//子流程列表
-    public static List<Lane> LaneList = new ArrayList<>();//泳道列表
-    public static List<NewProcess> newProcessList = new ArrayList<>();//任务、网关、事件列表
-    public static List<Sequence> SequenceList = new ArrayList<>();//顺序流列表
-    public static List<Parameter> ParameterList = new ArrayList<>();//参数列表
-    public static List<Event> EventList = new ArrayList<>();//事件列表
+    //子流程列表
+    public static List<SubProcess> SubProcessList = new ArrayList<>();
+    //泳道列表
+    public static List<Lane> LaneList = new ArrayList<>();
+    //任务、网关、事件列表
+    public static List<NewProcess> newProcessList = new ArrayList<>();
+    //顺序流列表
+    public static List<Sequence> SequenceList = new ArrayList<>();
+    //参数列表
+    public static List<Parameter> ParameterList = new ArrayList<>();
+    //事件列表
+    public static List<Event> EventList = new ArrayList<>();
+
     public static void main(String[] args) {
+        /**
+
+         *@描述 主要转换函数
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         try
         {
 
             //连接SQLite的JDBC
             Class.forName("org.sqlite.JDBC");
+
             //建立一个数据库名lincj.db的连接，如果不存在就在当前目录下创建之
             Connection conn = DriverManager.getConnection("jdbc:sqlite:identifier.sqlite");
             //Connection conn = DriverManager.getConnection("jdbc:sqlite:path(路径)/lincj.db");
@@ -42,7 +59,7 @@ public class ToBPMN
 
             //event表
             rs = stat.executeQuery("select * from BPMN_event;");
-            while (rs.next()){
+            while (rs.next()) {
                 Event event = new Event();
                 event.setE_id(rs.getString("e_id"));
                 event.setName(rs.getString("name"));
@@ -80,17 +97,26 @@ public class ToBPMN
                 newProcess.setTid(rs.getString("t_id"));
                 newProcess.setExecutor(rs.getString("executor"));
                 newProcess.setName(rs.getString("action"));
+
+
                 //如果接收方为空 则接收方为执行方
-                if(isEmpty(rs.getString("recipient")))
+                if(isEmpty(rs.getString("recipient"))){
                     newProcess.setRecipient(rs.getString("executor"));
-                else newProcess.setRecipient(rs.getString("recipient"));
+                }
+                else {
+                    newProcess.setRecipient(rs.getString("recipient"));
+                }
                 newProcess.setType("task");
                 newProcess.setWidth(100);
                 newProcess.setHeight(80);
-                int id = rs.getInt("id"); //implement表里的process_id process表里的id
+
+                //implement表里的process_id process表里的id
+                int id = rs.getInt("id");
                 preStat = conn.prepareStatement("select implement_id from BPMN_process_execute where process_id = ?");
                 preStat.setInt(1,id);
-                ResultSet rs1 = preStat.executeQuery();//得到implement_id
+
+                //得到implement_id
+                ResultSet rs1 = preStat.executeQuery();
                 List<Implement> implementList = new ArrayList<>();
                 while (rs1.next()) {
                     preStat = conn.prepareStatement("select * from BPMN_implement where id = ?");
@@ -112,6 +138,7 @@ public class ToBPMN
             int count =0;
             for(int i=0;i< newProcessList.size();i++){
                 NewProcess newProcess = newProcessList.get(i);
+
                 //一个执行条件对应多个执行动作  并行网关
                 if(newProcess.getType().equals("task")){
                     List<Implement> implementList = newProcess.getImplementList();
@@ -143,6 +170,7 @@ public class ToBPMN
                             count++;
                             implementList.get(j).setAction("进行"+gateway.getTid());
                             newProcessList.add(tidToIndex(tid),gateway);
+
                             //查询当前任务是否属于某一个子流程 如果是 则生成的网关也要加入该子流程
                             SubProcess subProcess = ifInSubProcess(tid);
                             if(subProcess!=null){
@@ -152,14 +180,19 @@ public class ToBPMN
                         }
                     }
                 }
+
                 //多个执行条件和动作
                 if(newProcess.getType().equals("task") && newProcess.getImplementList().size()>1){
                     NewProcess gateway = new NewProcess();
                     gateway.setTid("G"+count);
+
                     //如果执行条件为空 就是并行网关 否则是互斥网关
-                    if(!isEmpty(newProcess.getImplementList().get(0).getCondition()))
+                    if(!isEmpty(newProcess.getImplementList().get(0).getCondition())){
                         gateway.setType("exclusiveGateway");
-                    else gateway.setType("parallelGateway");
+                    }
+                    else {
+                        gateway.setType("parallelGateway");
+                    }
                     gateway.setWidth(50);
                     gateway.setHeight(50);
                     gateway.setExecutor(newProcess.getRecipient());
@@ -190,7 +223,9 @@ public class ToBPMN
                 for(int j=0;j<newProcessList.get(i).getImplementList().size();j++){
                     String action = newProcessList.get(i).getImplementList().get(j).getAction();
                     int length = action.length();
-                    if(!action.equals("结束")){ //并行网关
+
+                    //并行网关
+                    if(!action.equals("结束")){
                         List<String> tidList = new ArrayList<>(Arrays.asList(action.substring(2,length)));
                         int indexE = action.indexOf('/');
                         int indexP = action.indexOf('&');
@@ -207,6 +242,7 @@ public class ToBPMN
                     }
                 }
             }
+
             //如果prelist长度大于1则生成网关
             for(int i=0;i< newProcessList.size();i++){
                 int size = newProcessList.get(i).getPreList().size();
@@ -216,19 +252,27 @@ public class ToBPMN
                         List<String> path = new ArrayList<>();
                         path.add(newProcessList.get(i).getPreList().get(j));
                         int k = 0;
-                        while(newProcessList.get(tidToIndex(path.get(k))).getPreList().size()==1){ //只有前置唯一的时候才继续生成路径
+
+                        //只有前置唯一的时候才继续生成路径
+                        while(newProcessList.get(tidToIndex(path.get(k))).getPreList().size()==1){
                             path.add(newProcessList.get(tidToIndex(path.get(k))).getPreList().get(0));
                             k++;
                         }
                         pathList.add(path);
                     }
+
                     //找到所有路径中有重复的网关
-                    List<String> sameGatewayList = new ArrayList<>();//重复的网关
-                    List<List<String>> sameList = new ArrayList<>();//重复的网关路径起点对应newProcessList的preList元素
+                    //重复的网关
+                    List<String> sameGatewayList = new ArrayList<>();
+
+                    //重复的网关路径起点对应newProcessList的preList元素
+                    List<List<String>> sameList = new ArrayList<>();
                     for(int j=0;j<size;j++){
                         for(int k=0;k<pathList.get(j).size();k++){
                             if(pathList.get(j).get(k).substring(0,1).equals("G")){
-                                if(sameGatewayList.indexOf(pathList.get(j).get(k))<0){//如果之前没有加入过相同的
+
+                                //如果之前没有加入过相同的
+                                if(sameGatewayList.indexOf(pathList.get(j).get(k))<0){
                                     List<String> tidList = new ArrayList<>();
                                     for(int m=0;m<size;m++){
                                         if(pathList.get(m).indexOf(pathList.get(j).get(k))>=0)
@@ -242,8 +286,12 @@ public class ToBPMN
                             }
                         }
                     }
-                    if(sameGatewayList.size()<1) continue;//没有重复的 不需要生成网关
-                    int large = 0;//在sameGatewayList里的位置
+
+                    //没有重复的 不需要生成网关
+                    if(sameGatewayList.size()<1) continue;
+
+                    //在sameGatewayList里的位置
+                    int large = 0;
                     int largeIndex = -1;
                     for(int j=0;j<sameGatewayList.size();j++){
                         if(tidToIndex(sameGatewayList.get(j))>largeIndex){
@@ -267,17 +315,20 @@ public class ToBPMN
                     implementList.add(implement);
                     gateway.setImplementList(implementList);
                     count++;
+
                     //修改第i个newProcessList的preList
                     for(int j=0;j<sameList.get(large).size();j++){
                         int index = newProcessList.get(i).getPreList().indexOf(sameList.get(large).get(j));
                         newProcessList.get(i).getPreList().remove(index);
                     }
                     newProcessList.get(i).getPreList().add(gateway.getTid());
+
                     //修改sameList元素的执行动作
                     for(int j=0;j<sameList.get(large).size();j++){
                         int index = tidToIndex(sameList.get(large).get(j));
                         newProcessList.get(index).getImplementList().get(0).setAction("进行"+gateway.getTid());
                     }
+
                     //查询当前任务是否属于某一个子流程 如果是 则生成的网关也要加入该子流程
                     SubProcess subProcess = ifInSubProcess(newProcessList.get(i).getTid());
                     if(subProcess!=null){
@@ -301,12 +352,14 @@ public class ToBPMN
                     gateway.setHeight(50);
                     gateway.setExecutor(newProcessList.get(i).getExecutor());
                     gateway.setPreList(new ArrayList<>(newProcessList.get(i).getPreList()));
+
                     List<Implement> implementList = new ArrayList<>();
                     Implement implement = new Implement();
                     implement.setAction("进行"+newProcessList.get(i).getTid());
                     implementList.add(implement);
                     gateway.setImplementList(implementList);
                     count++;
+
                     //修改原来前置元素的执行动作
                     for(int j=0;j<newProcessList.get(i).getPreList().size();j++){
                         int index = tidToIndex(newProcessList.get(i).getPreList().get(j));
@@ -318,16 +371,19 @@ public class ToBPMN
                             }
                         }
                     }
+
                     //修改第i个newProcessList的preList 如果先修改这里 就找不到原本的前置了 无法修改原来前置的执行动作
                     List<String> l = new ArrayList<>();
                     l.add(gateway.getTid());
                     newProcessList.get(i).setPreList(l);
+
                     //查询当前任务是否属于某一个子流程 如果是 则生成的网关也要加入该子流程
                     SubProcess subProcess = ifInSubProcess(newProcessList.get(i).getTid());
                     if(subProcess!=null){
                         int index = subProcess.getTidList().indexOf(newProcessList.get(i).getTid());
                         subProcess.getTidList().add(index,gateway.getTid());
                     }
+
                     //把网关放进newProcessList
                     newProcessList.add(i,gateway);
                     i++;
@@ -345,20 +401,24 @@ public class ToBPMN
 
 
             for(int j=0;j< newProcessList.size();j++){
+
                 //查询是否属于子流程
                 NewProcess newProcess = newProcessList.get(j);
                 for (int i = 0; i < SubProcessList.size(); i++){
                     SubProcess subProcess = SubProcessList.get(i);
                     if(subProcess.getTidList().contains(newProcess.getTid())){
+
                         //给子流程中的事件或网关生成随机数id
                         if(newProcess.getType().equals("task"))
                             newProcess.setId("Activity_"+getRandomString());
                         else
                             newProcess.setId("Gateway_"+getRandomString());
+
                         //如果属于某一个子流程 就加进子流程的newProcessList
                         subProcess.getNewProcessList().add(newProcess);
                         newProcessList.remove(j);
                         if(subProcess.getTidList().get(0).equals(newProcess.getTid())){
+
                             //如果是某个子流程的第一个活动 就把子流程加入newProcessList
                             NewProcess subNewProcess = new NewProcess();
                             subNewProcess.setId(subProcess.getId());
@@ -377,8 +437,11 @@ public class ToBPMN
             }
 
 
+            //结束数据库的连接
             rs.close();
-            conn.close(); //结束数据库的连接
+            conn.close();
+
+
 
             //将总表中所有子流程的执行条件和执行动作赋值
             for(int i=0;i<newProcessList.size();i++){
@@ -401,7 +464,8 @@ public class ToBPMN
             //填充总表中每个元素的泳道id 生成总表中每个元素的随机数id 修改总表中task的执行动作格式 补充泳道的元素id列表
             for(int i=0;i<newProcessList.size();i++){
                 NewProcess process = newProcessList.get(i);
-                process.setLaneId(laneNameToId(process.getExecutor()));//填充泳道id
+                //填充泳道id
+                process.setLaneId(laneNameToId(process.getExecutor()));
                 //如果不是子流程 要生成随机数id 修改执行动作
                 if(!process.getType().equals("subProcess")){
                     //修改执行动作
@@ -428,6 +492,9 @@ public class ToBPMN
                 //在泳道类中填充元素的id列表
                 LaneList.get(getLaneIndex(process.getLaneId())).getElementIdList().add(process.getId());
             }
+
+
+
 
             //生成开始和结束事件 生成顺序流
             NewProcess begin = new NewProcess();
@@ -480,6 +547,8 @@ public class ToBPMN
             Output.printToFile(newProcessList,SequenceList,"PO",false);
 
 
+
+
             //生成子流程的顺序流
             for(int m=0;m<SubProcessList.size();m++){
                 List<NewProcess> newProcessList = SubProcessList.get(m).getNewProcessList();
@@ -500,18 +569,24 @@ public class ToBPMN
                 newProcessList.get(0).getIncomingList().add(beginningSequence.getId());
                 newProcessList.add(0,beginning);
                 for(int i=0;i< newProcessList.size();i++){
+
                     List<Implement> implementList = newProcessList.get(i).getImplementList();
+
                     for(int j=0;j<implementList.size();j++){
+
                         List<String> actionList = new ArrayList<>(Arrays.asList(implementList.get(j).getAction()));
                         int indexE = implementList.get(j).getAction().indexOf('/');
                         int indexP = implementList.get(j).getAction().indexOf('&');
+
                         if(indexE>=0){
                             actionList = new ArrayList<>(Arrays.asList(implementList.get(j).getAction().split("\\/")));
                         }
                         else if(indexP>=0){
                             actionList = new ArrayList<>(Arrays.asList(implementList.get(j).getAction().split("&")));
-                        }//并行网关
+                        }
+
                         for(int k = 0;k<actionList.size();k++){
+
                             Sequence sequence = new Sequence();
                             sequence.setId("Flow_"+getRandomString());
                             sequence.setName(implementList.get(j).getCondition());
@@ -553,6 +628,19 @@ public class ToBPMN
     }
 
     public static String getRandomString(){
+        /**
+
+         *@描述  生成随机Tid
+
+         *@参数  []
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         String str = "abcdefghijklmnopqrstuvwxyz0123456789";
         Random random = new Random();
         StringBuffer sb = new StringBuffer();
@@ -565,8 +653,22 @@ public class ToBPMN
 
     //填充子流程的执行条件和执行动作
     public static List<Implement> analyseSubProcess(SubProcess subProcess){
+        /**
+
+         *@描述  填充子流程的执行条件和执行动作
+
+         *@参数  [subProcess]
+
+         *@返回值  java.util.List<Entity.Implement>
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         List<NewProcess> newProcessList1 = subProcess.getNewProcessList();
-        List<Implement> implementList = new ArrayList<>();//子流程最终的implementList
+        //子流程最终的implementList
+        List<Implement> implementList = new ArrayList<>();
         for(int i=0;i<newProcessList1.size();i++){
             for(int j=0;j<newProcessList1.get(i).getImplementList().size();j++){
                 //implementList.add(newProcessList.get(i).getImplementList().get(j));
@@ -585,25 +687,30 @@ public class ToBPMN
                     }
                     else if(indexP>=0){
                         list = new ArrayList<>(Arrays.asList(action.split("&")));
-                    }//并行网关
+                    }
                 }
+
+
 
                 for(int k=0;k<list.size();k++){
                     if(!subProcess.getTidList().contains(list.get(k))){
                         //如果该tid不在本子流程内部的tid列表中，就判断是否在总表中，是否属于另一个子流程
                         if(!ifInNewProcess(list.get(k))){
                             String SPid = ifInSubProcess(list.get(k)).getSPid();
-                            if(SPid!=null){//SPid理论上不会为null
+                            //SPid理论上不会为null
+                            if(SPid!=null){
                                 //属于另一个子流程
                                 Implement implement = new Implement();
                                 implement.setCondition(newProcessList1.get(i).getImplementList().get(j).getCondition());
                                 implement.setAction(SPid);
                                 implementList.add(implement);
                                 newProcessList1.get(i).getImplementList().get(j).setAction("结束");
-                                break;//只考虑了 如果一个执行条件对应多个执行动作 则执行动作均属于同一个子流程
+                                //只考虑了 如果一个执行条件对应多个执行动作 则执行动作均属于同一个子流程
+                                break;
                             }
                         }
-                        else {//只要tid不属于子流程内部（在总表中） 就把执行动作改为结束 方便画子流程图
+                        //只要tid不属于子流程内部（在总表中） 就把执行动作改为结束 方便画子流程图
+                        else {
                             Implement implement = new Implement();
                             implement.setCondition(newProcessList1.get(i).getImplementList().get(j).getCondition());
                             implement.setAction(newProcessList1.get(i).getImplementList().get(j).getAction());
@@ -620,6 +727,19 @@ public class ToBPMN
 
     //查询tid是否在总表中 即是否属于某个子流程
     public static boolean ifInNewProcess(String tid){
+        /**
+
+         *@描述  查询tid是否在总表中 即是否属于某个子流程
+
+         *@参数  [tid]
+
+         *@返回值  boolean
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         for(int i=0;i<newProcessList.size();i++){
             if(newProcessList.get(i).getTid().equals(tid))
                 return true;
@@ -629,6 +749,19 @@ public class ToBPMN
 
     //查询tid在哪个子流程中
     public static SubProcess ifInSubProcess(String tid){
+        /**
+
+         *@描述  查询tid在哪个子流程中
+
+         *@参数  [tid]
+
+         *@返回值  Entity.SubProcess
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         for (int i=0;i<SubProcessList.size();i++){
             if(SubProcessList.get(i).getTidList().contains(tid))
                 return SubProcessList.get(i);
@@ -638,6 +771,19 @@ public class ToBPMN
 
     //由泳道的name得到它的随机数id
     public static String laneNameToId(String name){
+        /**
+
+         *@描述  由泳道的name得到它的随机数id
+
+         *@参数  [name]
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         for(int i=0;i<LaneList.size();i++){
             if(LaneList.get(i).getName().equals(name))
                 return LaneList.get(i).getId();
@@ -647,6 +793,19 @@ public class ToBPMN
 
     //由泳道id找到它在列表中的位置
     public static int getLaneIndex(String id){
+        /**
+
+         *@描述  由泳道id找到它在列表中的位置
+
+         *@参数  [id]
+
+         *@返回值  int
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         for(int i=0;i<LaneList.size();i++){
             if(LaneList.get(i).getId().equals(id))
                 return i;
@@ -656,6 +815,19 @@ public class ToBPMN
 
     //根据Tid在总表中查找该元素
     public static NewProcess taskTidToObject(String tid){
+        /**
+
+         *@描述  根据Tid在总表中查找该元素
+
+         *@参数  [tid] 元素的Tid
+
+         *@返回值  Entity.NewProcess
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         for(int i=0;i< newProcessList.size();i++){
             if(!isEmpty(newProcessList.get(i).getTid())&&newProcessList.get(i).getTid().equals(tid))
                 return newProcessList.get(i);
@@ -665,6 +837,19 @@ public class ToBPMN
 
     //根据Tid在总表中找到他的位置
     public static int tidToIndex(String tid){
+        /**
+
+         *@描述  根据Tid在总表中找到他的位置
+
+         *@参数  [tid] 元素的Tid
+
+         *@返回值  int
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         for(int i=0;i< newProcessList.size();i++){
             if(!isEmpty(newProcessList.get(i).getTid())&&newProcessList.get(i).getTid().equals(tid))
                 return i;
@@ -675,6 +860,19 @@ public class ToBPMN
 
     //判断总表中某属性是否为空
     public static boolean isEmpty(String item){
+        /**
+
+         *@描述  判断总表中某属性是否为空
+
+         *@参数  [item]
+
+         *@返回值  boolean
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         if(item==null||item.length()==0)
             return true;
         return false;

@@ -6,17 +6,30 @@ import Entity.Parameter;
 import java.io.*;
 import java.util.List;
 
+/**
+
+ *@描述  程序中生成符合BPMN2.0规范的代码文件
+
+ *@创建时间  2021/9/21
+
+ *@其他
+
+ */
+
 public class Output {
+
     public static List<NewProcess> newProcessList = null;
+
     public static List<Sequence> SequenceList = null;
 
     public static void printToFile(List<NewProcess> newProcessList1,List<Sequence> SequenceList1, String fileName, boolean ifSub) throws IOException {
+
         newProcessList = newProcessList1;
         SequenceList = SequenceList1;
         String path = ".\\output\\"+fileName+".bpmn";
         File file = new File(path);
         //如果文件不存在，则自动生成文件；
-        if(!file.exists()){
+        if(!file.exists()) {
             file.createNewFile();
         }
         //清空文件内容
@@ -29,23 +42,45 @@ public class Output {
         OutputStream outPutStream;
         try{
             outPutStream = new FileOutputStream(file);
-            StringBuilder stringBuilder = new StringBuilder();//使用长度可变的字符串对象；
-            if(!ifSub)
-                stringBuilder.append(total());//追加文件内容
-            else
+            //使用长度可变的字符串对象；
+            StringBuilder stringBuilder = new StringBuilder();
+            if(!ifSub) {
+                //追加文件内容
+                stringBuilder.append(total());
+            }
+            else {
                 stringBuilder.append(subTotal());
-
-            String context = stringBuilder.toString();//将可变字符串变为固定长度的字符串，方便下面的转码；
-            byte[]  bytes = context.getBytes("UTF-8");//因为中文可能会乱码，这里使用了转码，转成UTF-8；
-            outPutStream.write(bytes);//开始写入内容到文件；
-            outPutStream.close();//一定要关闭输出流；
-        }catch(Exception e){
-            e.printStackTrace();//获取异常
+            }
+            //将可变字符串变为固定长度的字符串，方便下面的转码；
+            String context = stringBuilder.toString();
+            //因为中文可能会乱码，这里使用了转码，转成UTF-8；
+            byte[]  bytes = context.getBytes("UTF-8");
+            //开始写入内容到文件；
+            outPutStream.write(bytes);
+            //一定要关闭输出流；
+            outPutStream.close();
+        }
+        catch(Exception e) {
+            //获取异常
+            e.printStackTrace();
         }
     }
 
     //生成主图代码
     public static String total(){
+        /**
+
+         *@描述  生成主图代码
+
+         *@参数  []
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         StringBuilder lines = new StringBuilder();
         String begin = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<bpmn2:definitions xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:bpmn2=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\" xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\" id=\"sample-diagram\" targetNamespace=\"http://bpmn.io/schema/bpmn\" xsi:schemaLocation=\"http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd\">\n";
@@ -67,6 +102,19 @@ public class Output {
 
     //parameter
     public static String parameter(){
+        /**
+
+         *@描述  生成参数模块代码
+
+         *@参数  []
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         StringBuilder lines = new StringBuilder();
         lines.append("Parameter=\"");
         for(int i = 0; i< ToBPMN.ParameterList.size(); i++){
@@ -79,6 +127,19 @@ public class Output {
 
     //process
     public static String process(){
+        /**
+
+         *@描述  生成主流程部分代码
+
+         *@参数  []
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         StringBuilder lines = new StringBuilder();
         String begin = "  <bpmn2:process id=\"Process_1\" isExecutable=\"false\">\n";
         lines.append(begin);
@@ -92,6 +153,19 @@ public class Output {
 
     //laneSet
     public static String laneSet(){
+        /**
+
+         *@描述  生成泳道部分代码
+
+         *@参数  []
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         StringBuilder lines = new StringBuilder();
         String begin = "    <bpmn2:laneSet id=\"LaneSet_109303u\">\n";
         lines.append(begin);
@@ -106,6 +180,19 @@ public class Output {
 
     //lane
     public static String lane(Lane lane){
+        /**
+
+         *@描述  生成池部分代码
+
+         *@参数  [lane]
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         StringBuilder lines = new StringBuilder();
         String begin = "      <bpmn2:lane id=\""+lane.getId()+"\" name=\""+lane.getName()+"\">\n";
         lines.append(begin);
@@ -120,12 +207,26 @@ public class Output {
 
     //newProcessList
     public static String elementList(){
+        /**
+
+         *@描述  生成元素集合部分代码
+
+         *@参数  []
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         StringBuilder lines = new StringBuilder();
         for(int i=0;i<newProcessList.size();i++){
             NewProcess newProcess = newProcessList.get(i);
             lines.append("    <bpmn2:"+newProcess.getType()+" id=\""+newProcess.getId()+"\"");
-            if(!isEmpty(newProcess.getName()))
+            if(!isEmpty(newProcess.getName())){
                 lines.append(" name=\""+newProcess.getName()+"\" ");
+            }
             if(newProcess.getEventList().size()!=0){
                 lines.append("Event=\"");
                 for(int j=0;j<newProcess.getEventList().size();j++){
@@ -134,10 +235,14 @@ public class Output {
                 lines.append("\"");
             }
             lines.append(">\n");
-            for(int j=0;j<newProcess.getIncomingList().size();j++)
+            for(int j=0;j<newProcess.getIncomingList().size();j++){
                 lines.append("      <bpmn2:incoming>"+newProcess.getIncomingList().get(j)+"</bpmn2:incoming>\n");
-            for(int k=0;k<newProcess.getOutgoingList().size();k++)
+            }
+
+            for(int k=0;k<newProcess.getOutgoingList().size();k++){
                 lines.append("      <bpmn2:outgoing>"+newProcess.getOutgoingList().get(k)+"</bpmn2:outgoing>\n");
+            }
+
             lines.append("    </bpmn2:"+newProcess.getType()+">\n");
         }
         return lines.toString();
@@ -145,6 +250,19 @@ public class Output {
 
     //sequenceFlow
     public static String sequenceFlow(){
+        /**
+
+         *@描述   生成顺序流部分代码
+
+         *@参数  []
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         StringBuilder lines = new StringBuilder();
         for(int i=0;i<SequenceList.size();i++){
             Sequence sequence = SequenceList.get(i);
@@ -158,6 +276,19 @@ public class Output {
 
     //position
     public static String position(){
+        /**
+
+         *@描述  生成总体自动布图位置代码
+
+         *@参数  []
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         StringBuilder lines = new StringBuilder();
         int count = 0;
         for(int i = 0; i< ToBPMN.LaneList.size(); i++){
@@ -174,7 +305,8 @@ public class Output {
                 "        <dc:Bounds x=\"0\" y=\"0\" width=\""+width+"\" height=\""+200* ToBPMN.LaneList.size()+"\" />\n" +
                 "      </bpmndi:BPMNShape>\n");
         for(int i = 0; i< ToBPMN.LaneList.size(); i++){
-            lines.append("      <bpmndi:BPMNShape id=\""+ ToBPMN.LaneList.get(i).getId()+"_di\" bpmnElement=\""+ ToBPMN.LaneList.get(i).getId()+"\" isHorizontal=\"true\">\n");
+            lines.append("      <bpmndi:BPMNShape id=\""+ ToBPMN.LaneList.get(i).getId()+"_di\" bpmnElement=\""+ ToBPMN.LaneList.get(i).getId()+
+                    "\" isHorizontal=\"true\">\n");
             lines.append("        <dc:Bounds x=\"30\" y=\""+i*200+"\" width=\""+widthLane+"\" height=\"200\" />\n");
             lines.append("      </bpmndi:BPMNShape>\n");
         }
@@ -187,6 +319,19 @@ public class Output {
 
     //elementPosition
     public static String elementPosition(){
+        /**
+
+         *@描述  生成元素自动布图位置代码
+
+         *@参数  []
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         StringBuilder lines = new StringBuilder();
         for(int i = 0; i< ToBPMN.LaneList.size(); i++){
             List<String> elementIdList = ToBPMN.LaneList.get(i).getElementIdList();
@@ -203,8 +348,10 @@ public class Output {
                     newProcess.setY(82);
                     lines.append("      <bpmndi:BPMNShape id=\"_BPMNShape_StartEvent_2\" bpmnElement=\"StartEvent_1\">\n" +
                             "        <dc:Bounds x=\"60\" y=\"82\" width=\"36\" height=\"36\" />\n");
-                    if(!isEmpty(newProcess.getName()))
+                    if(!isEmpty(newProcess.getName())){
                         lines.append(label(60,130));
+                    }
+
                     lines.append("      </bpmndi:BPMNShape>\n");
                     continue;
                 }
@@ -214,8 +361,10 @@ public class Output {
                 newProcess.setY(y2);
                 lines.append("      <bpmndi:BPMNShape id=\""+newProcess.getId()+"_di\" bpmnElement=\""+newProcess.getId()+"\">\n" +
                         "        <dc:Bounds x=\""+x+"\" y=\""+y2+"\" width=\""+newProcess.getWidth()+"\" height=\""+newProcess.getHeight()+"\" />\n");
-                if(!newProcess.getType().equals("task")&&!isEmpty(newProcess.getName()))
+                if(!newProcess.getType().equals("task")&&!isEmpty(newProcess.getName())){
                     lines.append(label(x,y2 + newProcess.getHeight()+10));
+                }
+
                 lines.append("      </bpmndi:BPMNShape>\n");
             }
         }
@@ -224,6 +373,19 @@ public class Output {
 
     //label
     public static String label(int x,int y){
+        /**
+
+         *@描述   生成顺序流及元素标签自动布图位置代码
+
+         *@参数  [x, y]
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         return "        <bpmndi:BPMNLabel>\n" +
                 "          <dc:Bounds x=\""+x+"\" y=\""+y+"\" width=\"62\" height=\"14\" />\n" +
                 "        </bpmndi:BPMNLabel>\n";
@@ -231,6 +393,19 @@ public class Output {
 
     //edgePosition
     public static String edgePosition(){
+        /**
+
+         *@描述  生成顺序流自动布图位置代码
+
+         *@参数  []
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         StringBuilder lines = new StringBuilder();
         for(int i=0;i<SequenceList.size();i++){
             Sequence sequence = SequenceList.get(i);
@@ -278,6 +453,19 @@ public class Output {
 
     //生成子流程图代码
     public static String subTotal(){
+        /**
+
+         *@描述  生成子流程图主框架代码
+
+         *@参数  []
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         StringBuilder lines = new StringBuilder();
         String begin = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<bpmn2:definitions xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:bpmn2=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\" xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\" id=\"sample-diagram\" targetNamespace=\"http://bpmn.io/schema/bpmn\" xsi:schemaLocation=\"http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd\">\n";
@@ -291,6 +479,19 @@ public class Output {
 
     //subProcess
     public static String subProcess(){
+        /**
+
+         *@描述  生成子流程元素代码
+
+         *@参数  []
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         StringBuilder lines = new StringBuilder();
         String begin = "  <bpmn2:process id=\"Process_1\" isExecutable=\"false\">\n";
         lines.append(begin);
@@ -303,6 +504,19 @@ public class Output {
 
     //subPosition
     public static String subPosition(){
+        /**
+
+         *@描述  生成子流程自动布图位置代码
+
+         *@参数  []
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         StringBuilder lines = new StringBuilder();
         lines.append("  <bpmndi:BPMNDiagram id=\"BPMNDiagram_1\">\n" +
                 "    <bpmndi:BPMNPlane id=\"BPMNPlane_1\" bpmnElement=\"Collaboration_03bi9q3\">\n");
@@ -315,6 +529,19 @@ public class Output {
 
     //subElementPosition
     public static String subElementPosition(){
+        /**
+
+         *@描述  生成子流程元素自动布图代码
+
+         *@参数  []
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         StringBuilder lines = new StringBuilder();
         for(int i=0;i<newProcessList.size();i++){
             int flag = 0;
@@ -327,8 +554,10 @@ public class Output {
                 newProcess.setY(82);
                 lines.append("      <bpmndi:BPMNShape id=\"_BPMNShape_StartEvent_2\" bpmnElement=\"StartEvent_1\">\n" +
                         "        <dc:Bounds x=\"60\" y=\"82\" width=\"36\" height=\"36\" />\n");
-                if(!isEmpty(newProcess.getName()))
+                if(!isEmpty(newProcess.getName())){
                     lines.append(label(60,130));
+                }
+
                 lines.append("      </bpmndi:BPMNShape>\n");
                 continue;
             }
@@ -338,8 +567,10 @@ public class Output {
             newProcess.setY(y2);
             lines.append("      <bpmndi:BPMNShape id=\""+newProcess.getId()+"_di\" bpmnElement=\""+newProcess.getId()+"\">\n" +
                     "        <dc:Bounds x=\""+x+"\" y=\""+y2+"\" width=\""+newProcess.getWidth()+"\" height=\""+newProcess.getHeight()+"\" />\n");
-            if(!newProcess.getType().equals("task")&&!isEmpty(newProcess.getName()))
+            if(!newProcess.getType().equals("task")&&!isEmpty(newProcess.getName())){
                 lines.append(label(x,y2 + newProcess.getHeight()+10));
+            }
+
             lines.append("      </bpmndi:BPMNShape>\n");
         }
         return lines.toString();
@@ -347,6 +578,19 @@ public class Output {
 
     //subEdgePosition
     public static String subEdgePosition(){
+        /**
+
+         *@描述  生成子流程顺序流自动布图代码
+
+         *@参数  []
+
+         *@返回值  java.lang.String
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         StringBuilder lines = new StringBuilder();
         for(int i=0;i<SequenceList.size();i++){
             Sequence sequence = SequenceList.get(i);
@@ -369,9 +613,24 @@ public class Output {
 
     //根据泳道id找到它在泳道列表中的索引
     public static int laneIdToIndex(String laneId){
+        /**
+
+         *@描述  根据泳道id找到它在泳道列表中的索引
+
+         *@参数  [laneId]
+
+         *@返回值  int
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         for(int i = 0; i< ToBPMN.LaneList.size(); i++){
-            if(ToBPMN.LaneList.get(i).getId().equals(laneId))
+            if(ToBPMN.LaneList.get(i).getId().equals(laneId)){
                 return i;
+            }
+
         }
         return -1;//应该不会发生
     }
@@ -379,16 +638,33 @@ public class Output {
 
     //根据随机数id在总表中查找该元素
     public static NewProcess elementIdToObject(String id){
+        /**
+
+         *@描述  根据随机数id在总表中查找该元素
+
+         *@参数  [id]
+
+         *@返回值  Entity.NewProcess
+
+         *@创建时间  2021/9/21
+
+         *@其他
+
+         */
         for(int i=0;i< newProcessList.size();i++){
-            if(newProcessList.get(i).getId().equals(id))
+            if(newProcessList.get(i).getId().equals(id)){
                 return newProcessList.get(i);
+            }
+
         }
         return null;//应该不会发生
     }
 
     public static boolean isEmpty(String item){
-        if(item==null||item.length()==0)
+        if(item==null||item.length()==0){
             return true;
+        }
+
         return false;
     }
 }
