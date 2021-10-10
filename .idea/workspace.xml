@@ -20,18 +20,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e0cc5c3b-f3c5-4a80-a628-7d79eac34664" name="默认的" comment="">
-      <change beforePath="$PROJECT_DIR$/output/PO.bpmn" beforeDir="false" afterPath="$PROJECT_DIR$/output/PO.bpmn" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/PO0.bpmn" beforeDir="false" afterPath="$PROJECT_DIR$/output/PO0.bpmn" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/PO1.bpmn" beforeDir="false" afterPath="$PROJECT_DIR$/output/PO1.bpmn" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output/PO2.bpmn" beforeDir="false" afterPath="$PROJECT_DIR$/output/PO2.bpmn" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/Event.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Event.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/Implement.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Implement.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/Lane.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Lane.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/NewProcess.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/NewProcess.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/Parameter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Parameter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/Sequence.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Sequence.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/SubProcess.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/SubProcess.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Output.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Output.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/toBPMN/META-INF/toBPMN.kotlin_module" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/toBPMN/ToBPMN.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/toBPMN/ToBPMN.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/output/PO.bpmn" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/output/PO0.bpmn" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/output/PO1.bpmn" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/output/PO2.bpmn" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ToBPMN.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ToBPMN.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -57,15 +55,19 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="DatabaseDriversLRU" value="sqlite" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/libs/sqlite-jdbc-3.34.0.jar!/" />
     <property name="project.structure.last.edited" value="模块" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.508046" />
+    <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="editing.templates" />
+    <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RunManager">
     <configuration name="ToBPMN" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
@@ -73,16 +75,18 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="ToBPMN" />
       <module name="toBPMN" />
+      <option name="PROGRAM_PARAMETERS" value="18 46" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="应用程序.ToBPMN" />
+        <item itemvalue="Application.ToBPMN" />
       </list>
     </recent_temporary>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -102,11 +106,18 @@
       <workItem from="1629592976044" duration="5179000" />
       <workItem from="1630840986463" duration="1537000" />
       <workItem from="1632225700034" duration="5792000" />
+      <workItem from="1632294583446" duration="471000" />
+      <workItem from="1632308999009" duration="1055000" />
+      <workItem from="1632399929376" duration="1315000" />
+      <workItem from="1632743028338" duration="15664000" />
+      <workItem from="1632797129942" duration="15222000" />
+      <workItem from="1632908762152" duration="5801000" />
+      <workItem from="1633833230398" duration="178000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="2" />
+    <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -125,45 +136,80 @@
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
     <state x="1124" y="450" key="#com.intellij.codeInsight.template.impl.EditVariableDialog/0.0.1920.1080@0.0.1920.1080" timestamp="1632226477859" />
-    <state x="213" y="249" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1629597599392">
-      <screen x="0" y="0" width="1920" height="1080" />
+    <state x="181" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1632920700170">
+      <screen x="0" y="0" width="1280" height="689" />
     </state>
+    <state x="181" y="0" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1280.689@0.0.1280.689" timestamp="1632920700170" />
     <state x="213" y="249" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1080@0.0.1920.1080" timestamp="1629597599392" />
     <state x="488" y="383" key="#com.intellij.ide.util.TreeClassChooserDialog" timestamp="1629546050798">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
     <state x="488" y="383" key="#com.intellij.ide.util.TreeClassChooserDialog/0.0.1920.1080@0.0.1920.1080" timestamp="1629546050798" />
-    <state x="614" y="314" key="FileChooserDialogImpl" timestamp="1629546088893">
-      <screen x="0" y="0" width="1920" height="1080" />
+    <state x="409" y="199" key="FileChooserDialogImpl" timestamp="1632743665927">
+      <screen x="0" y="0" width="1280" height="689" />
     </state>
+    <state x="409" y="199" key="FileChooserDialogImpl/0.0.1280.689@0.0.1280.689" timestamp="1632743665927" />
     <state x="614" y="314" key="FileChooserDialogImpl/0.0.1920.1080@0.0.1920.1080" timestamp="1629546088893" />
-    <state width="1877" height="177" key="GridCell.Tab.0.bottom" timestamp="1629601330333">
-      <screen x="0" y="0" width="1920" height="1080" />
+    <state width="1237" height="373" key="GridCell.Tab.0.bottom" timestamp="1632929222710">
+      <screen x="0" y="0" width="1280" height="689" />
     </state>
+    <state width="1237" height="373" key="GridCell.Tab.0.bottom/0.0.1280.689@0.0.1280.689" timestamp="1632929222710" />
     <state width="1877" height="177" key="GridCell.Tab.0.bottom/0.0.1920.1080@0.0.1920.1080" timestamp="1629601330333" />
-    <state width="1877" height="177" key="GridCell.Tab.0.center" timestamp="1629601330332">
-      <screen x="0" y="0" width="1920" height="1080" />
+    <state width="1237" height="373" key="GridCell.Tab.0.center" timestamp="1632929222708">
+      <screen x="0" y="0" width="1280" height="689" />
     </state>
+    <state width="1237" height="373" key="GridCell.Tab.0.center/0.0.1280.689@0.0.1280.689" timestamp="1632929222708" />
     <state width="1877" height="177" key="GridCell.Tab.0.center/0.0.1920.1080@0.0.1920.1080" timestamp="1629601330332" />
-    <state width="1877" height="177" key="GridCell.Tab.0.left" timestamp="1629601330332">
-      <screen x="0" y="0" width="1920" height="1080" />
+    <state width="1237" height="373" key="GridCell.Tab.0.left" timestamp="1632929222707">
+      <screen x="0" y="0" width="1280" height="689" />
     </state>
+    <state width="1237" height="373" key="GridCell.Tab.0.left/0.0.1280.689@0.0.1280.689" timestamp="1632929222707" />
     <state width="1877" height="177" key="GridCell.Tab.0.left/0.0.1920.1080@0.0.1920.1080" timestamp="1629601330332" />
-    <state width="1877" height="177" key="GridCell.Tab.0.right" timestamp="1629601330332">
-      <screen x="0" y="0" width="1920" height="1080" />
+    <state width="1237" height="373" key="GridCell.Tab.0.right" timestamp="1632929222709">
+      <screen x="0" y="0" width="1280" height="689" />
     </state>
+    <state width="1237" height="373" key="GridCell.Tab.0.right/0.0.1280.689@0.0.1280.689" timestamp="1632929222709" />
     <state width="1877" height="177" key="GridCell.Tab.0.right/0.0.1920.1080@0.0.1920.1080" timestamp="1629601330332" />
-    <state width="152" height="477" key="HiddenNamespacesPopup" timestamp="1629598454707">
-      <screen x="0" y="0" width="1920" height="1080" />
+    <state width="1237" height="238" key="GridCell.Tab.1.bottom" timestamp="1632929222702">
+      <screen x="0" y="0" width="1280" height="689" />
     </state>
+    <state width="1237" height="238" key="GridCell.Tab.1.bottom/0.0.1280.689@0.0.1280.689" timestamp="1632929222702" />
+    <state width="1237" height="238" key="GridCell.Tab.1.center" timestamp="1632929222701">
+      <screen x="0" y="0" width="1280" height="689" />
+    </state>
+    <state width="1237" height="238" key="GridCell.Tab.1.center/0.0.1280.689@0.0.1280.689" timestamp="1632929222701" />
+    <state width="1237" height="238" key="GridCell.Tab.1.left" timestamp="1632929222701">
+      <screen x="0" y="0" width="1280" height="689" />
+    </state>
+    <state width="1237" height="238" key="GridCell.Tab.1.left/0.0.1280.689@0.0.1280.689" timestamp="1632929222701" />
+    <state width="1237" height="238" key="GridCell.Tab.1.right" timestamp="1632929222701">
+      <screen x="0" y="0" width="1280" height="689" />
+    </state>
+    <state width="1237" height="238" key="GridCell.Tab.1.right/0.0.1280.689@0.0.1280.689" timestamp="1632929222701" />
+    <state width="218" height="305" key="HiddenNamespacesPopup" timestamp="1632743171062">
+      <screen x="0" y="0" width="1280" height="689" />
+    </state>
+    <state width="218" height="305" key="HiddenNamespacesPopup/0.0.1280.689@0.0.1280.689" timestamp="1632743171062" />
     <state width="152" height="477" key="HiddenNamespacesPopup/0.0.1920.1080@0.0.1920.1080" timestamp="1629598454707" />
     <state x="909" y="265" key="SettingsEditor" timestamp="1632226491718">
       <screen x="0" y="0" width="1920" height="1080" />
     </state>
     <state x="909" y="265" key="SettingsEditor/0.0.1920.1080@0.0.1920.1080" timestamp="1632226491718" />
-    <state x="938" y="270" width="672" height="678" key="search.everywhere.popup" timestamp="1629546680203">
-      <screen x="0" y="0" width="1920" height="1080" />
+    <state x="625" y="172" width="672" height="433" key="search.everywhere.popup" timestamp="1632919807097">
+      <screen x="0" y="0" width="1280" height="689" />
     </state>
+    <state x="625" y="172" width="672" height="433" key="search.everywhere.popup/0.0.1280.689@0.0.1280.689" timestamp="1632919807097" />
     <state x="938" y="270" width="672" height="678" key="search.everywhere.popup/0.0.1920.1080@0.0.1920.1080" timestamp="1629546680203" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="Application">
+        <watch expression="SubProcessList" language="JAVA" />
+        <watch expression="newProcessList" language="JAVA" />
+        <watch expression="i" language="JAVA" />
+        <watch expression="m" language="JAVA" />
+        <watch expression="newProcessList1" language="JAVA" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

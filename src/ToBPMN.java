@@ -42,57 +42,189 @@ public class ToBPMN
             Class.forName("org.sqlite.JDBC");
 
             //建立一个数据库名lincj.db的连接，如果不存在就在当前目录下创建之
-            Connection conn = DriverManager.getConnection("jdbc:sqlite:identifier.sqlite");
+//            Connection conn = DriverManager.getConnection("jdbc:sqlite:identifier.sqlite"); 以前的库
+            Connection conn = DriverManager.getConnection("jdbc:sqlite:C:/Users/zqh/Desktop/work/final/toBPMN/db.sqlite3");
             //Connection conn = DriverManager.getConnection("jdbc:sqlite:path(路径)/lincj.db");
             Statement stat = conn.createStatement();
             PreparedStatement preStat = null;
+            PreparedStatement preStat1 = null;
+
+            //app_contract_template表中的id
+            int contractId = Integer.parseInt(args[0]); //eg.18
+            //app_contract_template表中的model_id
+            int modelId = Integer.parseInt(args[1]);  //eg.46
+            //合同名字
+            String contractName = "";
+            preStat = conn.prepareStatement("select * from app_contract_template where id = ? ");
+            preStat.setInt(1,contractId);
+            ResultSet rs = preStat.executeQuery();
+            while (rs.next())
+                contractName = rs.getString("name");
+
+            //先从app_contract_template_parameter_list中得到parameter的id 再去parameter表中按id查找
+            preStat = conn.prepareStatement("select * from app_contract_template_parameter_list where contract_template_id = ? ;");
+            preStat.setInt(1,contractId);
+            rs = preStat.executeQuery();
+            List<Integer> parameterIdList = new ArrayList<>();
+            while (rs.next()){
+                parameterIdList.add(rs.getInt("parameter_id"));
+            }
 
             //parameter表
-            ResultSet rs = stat.executeQuery("select * from BPMN_parameter;");
-            while(rs.next()) {
+            preStat = conn.prepareStatement("select * from app_parameter where id = ? ;");
+            for(int i=0;i<parameterIdList.size();i++){
+                preStat.setInt(1,parameterIdList.get(i));
+                rs = preStat.executeQuery();
                 Parameter parameter = new Parameter();
                 parameter.setPid(rs.getString("p_id"));
                 parameter.setName(rs.getString("name"));
-                parameter.setType(rs.getString("typr"));
+                parameter.setType(rs.getString("type"));
                 ParameterList.add(parameter);
             }
 
+
+            //先从app_contract_template_event_list中得到event的id 再去event表中按id查找
+            preStat = conn.prepareStatement("select * from app_contract_template_event_list where contract_template_id = ? ;");
+            preStat.setInt(1,contractId);
+            rs = preStat.executeQuery();
+            List<Integer> eventIdList = new ArrayList<>();
+            while (rs.next()){
+                eventIdList.add(rs.getInt("event_id"));
+            }
+
             //event表
-            rs = stat.executeQuery("select * from BPMN_event;");
-            while (rs.next()) {
+            preStat = conn.prepareStatement("select * from app_event where id = ? ;");
+            for(int i=0;i<eventIdList.size();i++){
+                preStat.setInt(1,eventIdList.get(i));
+                rs = preStat.executeQuery();
+
                 Event event = new Event();
                 event.setE_id(rs.getString("e_id"));
                 event.setName(rs.getString("name"));
                 event.setDescription(rs.getString("description"));
                 String pid = rs.getString("process_id");
-                event.setProcess_id(new ArrayList<>(Arrays.asList(pid.split("、"))));
+                //截去首尾[]
+                int pidL = pid.length();
+                pid = pid.substring(1,pidL-1);
+                //分割
+                event.setProcess_id(new ArrayList<>(Arrays.asList(pid.split(","))));
+                //对list中每一个元素截去‘’
+                for(int j=0;j<event.getProcess_id().size();j++){
+                    String tmp = event.getProcess_id().get(j);
+                    int tmpL = tmp.length();
+                    if(j==0){
+                        tmp = tmp.substring(1,tmpL-1);
+                        event.getProcess_id().set(j,tmp);
+                    }
+                    else{
+                        tmp = tmp.substring(2,tmpL-1);
+                        event.getProcess_id().set(j,tmp);
+                    }
+
+                }
+                //processid格式不符 0927
                 EventList.add(event);
             }
 
+//            while (rs.next()) {
+//                Event event = new Event();
+//                event.setE_id(rs.getString("e_id"));
+//                event.setName(rs.getString("name"));
+//                event.setDescription(rs.getString("description"));
+//                String pid = rs.getString("process_id");
+//                //截去首尾[]
+//                int pidL = pid.length();
+//                pid = pid.substring(1,pidL-1);
+//                //分割
+//                event.setProcess_id(new ArrayList<>(Arrays.asList(pid.split(","))));
+//                //对list中每一个元素截去‘’
+//                for(int i=0;i<event.getProcess_id().size();i++){
+//                    String tmp = event.getProcess_id().get(i);
+//                    int tmpL = tmp.length();
+//                    tmp = tmp.substring(1,tmpL-1);
+//                    event.getProcess_id().set(i,tmp);
+//                }
+//                //processid格式不符 0927
+//                EventList.add(event);
+//            }
+
+            //先从app_contract_template_subprocess_list中得到subprocess的id 再去subprocess表中按id查找
+            preStat = conn.prepareStatement("select * from app_contract_template_subprocess_list where contract_template_id = ? ;");
+            preStat.setInt(1,contractId);
+            rs = preStat.executeQuery();
+            List<Integer> subprocessIdList = new ArrayList<>();
+            while (rs.next()){
+                subprocessIdList.add(rs.getInt("subprocess_id"));
+            }
+
             //subprocess表
-            rs = stat.executeQuery("select * from BPMN_subprocess;"); //查询数据
-            while (rs.next()) {
+            preStat = conn.prepareStatement("select * from app_subprocess where id = ? ;");
+            for(int i=0;i<subprocessIdList.size();i++){
+                preStat.setInt(1,subprocessIdList.get(i));
+                rs = preStat.executeQuery();
+
                 SubProcess subProcess = new SubProcess();
                 subProcess.setSPid(rs.getString("sp_id"));
                 subProcess.setName(rs.getString("name"));
                 subProcess.setId("Activity_"+getRandomString());
                 String processId = rs.getString("process_id");
-                subProcess.setTidList(new ArrayList<>(Arrays.asList(processId.split("、"))));
+                //processid格式不符 0927
+                //截去首尾[]
+                int pidL = processId.length();
+                processId = processId.substring(1,pidL-1);
+                //分割
+                subProcess.setTidList(new ArrayList<>(Arrays.asList(processId.split(","))));
+                //对list中每一个元素截去‘’
+                for(int j=0;j<subProcess.getTidList().size();j++){
+                    String tmp = subProcess.getTidList().get(j);
+                    int tmpL = tmp.length();
+                    if(j==0){
+                        tmp = tmp.substring(1,tmpL-1);
+                        subProcess.getTidList().set(j,tmp);
+                    }
+                    else{
+                        tmp = tmp.substring(2,tmpL-1);
+                        subProcess.getTidList().set(j,tmp);
+                    }
+                }
+
                 SubProcessList.add(subProcess);
             }
 
-            //process表 得到所有泳道
-            rs = stat.executeQuery("select distinct executor from BPMN_process;");
-            while(rs.next()) {
-                Lane lane = new Lane();
-                lane.setName(rs.getString("executor"));
-                lane.setId("Lane_"+getRandomString());
-                LaneList.add(lane);
+            //先从app_model_template_process中得到process的id 再去process表中按id查找
+            preStat = conn.prepareStatement("select * from app_model_template_process where model_template_id = ? ;");
+            preStat.setInt(1,modelId);
+            rs = preStat.executeQuery();
+            List<Integer> processIdList = new ArrayList<>();
+            while (rs.next()){
+                processIdList.add(rs.getInt("process_id"));
             }
 
             //process表 替换子流程 创建newProcess列表
-            rs = stat.executeQuery("select * from BPMN_process;");
-            while (rs.next()) {
+            preStat1 = conn.prepareStatement("select * from app_process where id = ? ;");
+            for(int i=0;i<processIdList.size();i++){
+                preStat1.setInt(1,processIdList.get(i));
+                rs = preStat1.executeQuery();
+
+                //得到所有泳道
+                String tmpLane = rs.getString("executor");
+                int flagLane = 0; //为1表示有重复
+                for(int j=0;j<LaneList.size();j++){
+                    if(LaneList.get(j).getName().equals(tmpLane)){
+                        flagLane = 1;
+                        break;
+                    }
+                }
+                if(flagLane==0){
+                    Lane lane = new Lane();
+                    lane.setName(tmpLane);
+                    lane.setId("Lane_"+getRandomString());
+                    LaneList.add(lane);
+                }
+
+
+
+                //替换子流程 创建newProcess列表
                 NewProcess newProcess = new NewProcess();
                 newProcess.setTid(rs.getString("t_id"));
                 newProcess.setExecutor(rs.getString("executor"));
@@ -100,7 +232,8 @@ public class ToBPMN
 
 
                 //如果接收方为空 则接收方为执行方
-                if(isEmpty(rs.getString("recipient"))){
+//                if(isEmpty(rs.getString("recipient"))){  //0927 判空条件更改
+                if(rs.getString("recipient").equals('-')){
                     newProcess.setRecipient(rs.getString("executor"));
                 }
                 else {
@@ -112,20 +245,22 @@ public class ToBPMN
 
                 //implement表里的process_id process表里的id
                 int id = rs.getInt("id");
-                preStat = conn.prepareStatement("select implement_id from BPMN_process_execute where process_id = ?");
+                preStat = conn.prepareStatement("select implement_id from app_process_execute where process_id = ?");
                 preStat.setInt(1,id);
 
                 //得到implement_id
                 ResultSet rs1 = preStat.executeQuery();
                 List<Implement> implementList = new ArrayList<>();
                 while (rs1.next()) {
-                    preStat = conn.prepareStatement("select * from BPMN_implement where id = ?");
+                    preStat = conn.prepareStatement("select * from app_implement where id = ?");
                     preStat.setInt(1,rs1.getInt("implement_id"));
                     ResultSet rs2 = preStat.executeQuery();
                     while (rs2.next()) {
                         Implement implement = new Implement();
                         implement.setAction(rs2.getString("execute_action"));
-                        implement.setCondition(rs2.getString("execute_condition"));
+                        if(!rs2.getString("execute_condition").equals("-")){
+                            implement.setCondition(rs2.getString("execute_condition"));
+                        }
                         implementList.add(implement);
                     }
                 }
@@ -151,11 +286,18 @@ public class ToBPMN
                             NewProcess gateway = new NewProcess();
                             gateway.setTid("G"+count);
                             if(indexE>=0){
-                                tid = action.substring(2,indexE);
+                                if(action.indexOf("进行")>=0)
+                                    tid = action.substring(2,indexE);
+                                else
+                                    tid = action.substring(0,indexE);
+//                                System.out.println(tid);
                                 gateway.setType("exclusiveGateway");
                             }
                             else if(indexP>=0){
-                                tid = action.substring(2,indexP);
+                                if(action.indexOf("进行")>=0)
+                                    tid = action.substring(2,indexP);
+                                else
+                                    tid = action.substring(0,indexP);
                                 gateway.setType("parallelGateway");
                             }
                             gateway.setWidth(50);
@@ -224,16 +366,21 @@ public class ToBPMN
                     String action = newProcessList.get(i).getImplementList().get(j).getAction();
                     int length = action.length();
 
-                    //并行网关
+                    //并行网关  0927
                     if(!action.equals("结束")){
-                        List<String> tidList = new ArrayList<>(Arrays.asList(action.substring(2,length)));
+//                        List<String> tidList = new ArrayList<>(Arrays.asList(action.substring(2,length)));
+                        List<String> tidList = new ArrayList<>();
                         int indexE = action.indexOf('/');
                         int indexP = action.indexOf('&');
                         if(indexE>=0){
-                            tidList = new ArrayList<>(Arrays.asList(action.substring(2,length).split("/")));
+                            if(action.indexOf("进行")>=0)
+                                action = action.substring(2,length);
+                            tidList = new ArrayList<>(Arrays.asList(action.split("/")));
                         }
                         else if(indexP>=0){
-                            tidList = new ArrayList<>(Arrays.asList(action.substring(2,length).split("&")));
+                            if(action.indexOf("进行")>=0)
+                                action = action.substring(2,length);
+                            tidList = new ArrayList<>(Arrays.asList(action.split("&")));
                         }
                         for(int k=0;k<tidList.size();k++){
                             int index = tidToIndex(tidList.get(k));
@@ -365,7 +512,10 @@ public class ToBPMN
                         int index = tidToIndex(newProcessList.get(i).getPreList().get(j));
                         for(int k=0;k<newProcessList.get(index).getImplementList().size();k++){
                             int length = newProcessList.get(index).getImplementList().get(k).getAction().length();
-                            if(newProcessList.get(index).getImplementList().get(k).getAction().substring(2,length).equals(newProcessList.get(i).getTid())){
+                            String tmpString = newProcessList.get(index).getImplementList().get(k).getAction();
+                            if(tmpString.indexOf("进行")>=0)
+                                tmpString = tmpString.substring(2,length);
+                            if(tmpString.equals(newProcessList.get(i).getTid())){
                                 newProcessList.get(index).getImplementList().get(k).setAction("进行"+gateway.getTid());
                                 break;
                             }
@@ -450,15 +600,31 @@ public class ToBPMN
                     for(int j=0;j<SubProcessList.size();j++){
                         if(SubProcessList.get(j).getSPid().equals(SPid)){
                             List<Implement> implementList = analyseSubProcess(SubProcessList.get(j));
+
+                            //考虑如果返回的implementList为空的话 添加结束 0929
+                            if(implementList.size()==0){
+                                NewProcess end = new NewProcess();
+                                end.setId("Event_"+getRandomString());
+                                end.setType("endEvent");
+                                end.setExecutor(newProcessList.get(i).getExecutor());
+//                                end.setLaneId(newProcessList.get(i).getLaneId());
+//                                end.getOutgoingList().add(sequence.getId());
+                                end.setHeight(36);
+                                end.setWidth(36);
+                                end.setTid(SPid+"E");
+                                newProcessList.add(i+1,end);
+
+                                Implement endImplement = new Implement();
+                                endImplement.setAction(end.getTid());
+                                implementList.add(endImplement);
+                            }
+
                             newProcessList.get(i).setImplementList(implementList);
                             break;
                         }
                     }
                 }
             }
-
-
-
 
 
             //填充总表中每个元素的泳道id 生成总表中每个元素的随机数id 修改总表中task的执行动作格式 补充泳道的元素id列表
@@ -474,7 +640,8 @@ public class ToBPMN
                         String action = implementList.get(j).getAction();
                         if(!action.equals("结束")){
                             int length = action.length();
-                            action = action.substring(2,length);
+                            if(action.indexOf("进行")>=0)
+                                action = action.substring(2,length);
                             //判断执行动作是否属于子流程
                             if(!ifInNewProcess(action)){
                                 //不在总表中 替换为对应的子流程SPid
@@ -544,9 +711,7 @@ public class ToBPMN
                 }
             }
 
-            Output.printToFile(newProcessList,SequenceList,"PO",false);
-
-
+            Output.printToFile(newProcessList,SequenceList,contractName,false);
 
 
             //生成子流程的顺序流
@@ -616,7 +781,7 @@ public class ToBPMN
 
                     }
                 }
-                Output.printToFile(newProcessList,SequenceList,"PO"+m,true);
+                Output.printToFile(newProcessList,SequenceList,contractName+"_"+m,true);
             }
 
         }
@@ -674,14 +839,16 @@ public class ToBPMN
                 //implementList.add(newProcessList.get(i).getImplementList().get(j));
                 String action = newProcessList1.get(i).getImplementList().get(j).getAction();
                 List<String> list = new ArrayList<>();
+                int indexE = 0, indexP = 0;
                 //把子流程中执行动作里的“进行”都去掉
                 if(!action.equals("结束")){
                     int length = action.length();
-                    action = action.substring(2,length);
+                    if(action.indexOf("进行")>=0)
+                        action = action.substring(2,length);
                     newProcessList1.get(i).getImplementList().get(j).setAction(action);
                     list = new ArrayList<>(Arrays.asList(action));
-                    int indexE = action.indexOf('/');
-                    int indexP = action.indexOf('&');
+                    indexE = action.indexOf('/');
+                    indexP = action.indexOf('&');
                     if(indexE>=0){
                         list = new ArrayList<>(Arrays.asList(action.split("\\/")));
                     }
@@ -704,9 +871,11 @@ public class ToBPMN
                                 implement.setCondition(newProcessList1.get(i).getImplementList().get(j).getCondition());
                                 implement.setAction(SPid);
                                 implementList.add(implement);
-                                newProcessList1.get(i).getImplementList().get(j).setAction("结束");
-                                //只考虑了 如果一个执行条件对应多个执行动作 则执行动作均属于同一个子流程
-                                break;
+//                                newProcessList1.get(i).getImplementList().get(j).setAction("结束");
+//                                list.remove(k);
+                                list.set(k,"结束");
+                                //只考虑了 如果一个执行条件对应多个执行动作 则执行动作均属于同一个子流程  0928
+//                                break;
                             }
                         }
                         //只要tid不属于子流程内部（在总表中） 就把执行动作改为结束 方便画子流程图
@@ -715,10 +884,42 @@ public class ToBPMN
                             implement.setCondition(newProcessList1.get(i).getImplementList().get(j).getCondition());
                             implement.setAction(newProcessList1.get(i).getImplementList().get(j).getAction());
                             implementList.add(implement);
-                            newProcessList1.get(i).getImplementList().get(j).setAction("结束");
+//                            newProcessList1.get(i).getImplementList().get(j).setAction("结束");
+                            list.set(k,"结束");
                         }
                     }
                 }
+
+                //如果曾经有分隔符 把list里所有内容拼接起来 放回原来的action 0928
+                StringBuilder newAction = new StringBuilder();
+//                    action="";
+                if(indexE>0){
+                    for(int h=0;h<list.size();h++){
+                        newAction.append(list.get(h));
+                        if(h!=list.size()-1)
+                            newAction.append("\\/");
+                    }
+                }
+                else if(indexP>0){
+                    for(int h=0;h<list.size();h++){
+                        newAction.append(list.get(h));
+                        if(h!=list.size()-1)
+                            newAction.append("&");
+                    }
+                }
+                else{
+                    if(list.size()==0) {
+//                        System.out.println(i);
+//                        System.out.println(subProcess.getSPid());
+                        newAction.append("结束");
+                    }
+                    else{
+                        newAction.append(list.get(0)) ;
+                    }
+                }
+
+
+                newProcessList1.get(i).getImplementList().get(j).setAction(newAction.toString());
             }
         }
         subProcess.setImplementList(implementList);
