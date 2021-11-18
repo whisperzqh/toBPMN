@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+  <bpmn2:process id="Process_1" isExecutable="false">
+    <bpmn2:startEvent id="StartEvent_1">
+      <bpmn2:outgoing>Flow_webdof2</bpmn2:outgoing>
+    </bpmn2:startEvent>
+    <bpmn2:exclusiveGateway id="Gateway_cyrdoaq">
+      <bpmn2:incoming>Flow_webdof2</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_15pwdin</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_xip0o5a</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:task id="Activity_wwa115f" name="向平台分期付款" Event="$甲方向平台付款完成$;">
+      <bpmn2:incoming>Flow_15pwdin</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_cezj97r</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Activity_iovd6pu" name="向平台付全款" >
+      <bpmn2:incoming>Flow_xip0o5a</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_ya7sbtf</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Activity_8hy3wi2" name="接受甲方付款" >
+      <bpmn2:incoming>Flow_cezj97r</bpmn2:incoming>
+      <bpmn2:incoming>Flow_ya7sbtf</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_4e4pviz</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:endEvent id="Event_k7hgx3k">
+      <bpmn2:outgoing>Flow_4e4pviz</bpmn2:outgoing>
+    </bpmn2:endEvent>
+    <bpmn2:sequenceFlow id="Flow_webdof2" sourceRef="StartEvent_1" targetRef="Gateway_cyrdoaq" />
+    <bpmn2:sequenceFlow id="Flow_15pwdin" name="审核通过" sourceRef="Gateway_cyrdoaq" targetRef="Activity_wwa115f" />
+    <bpmn2:sequenceFlow id="Flow_xip0o5a" name="审核通过" sourceRef="Gateway_cyrdoaq" targetRef="Activity_iovd6pu" />
+    <bpmn2:sequenceFlow id="Flow_cezj97r" name="分期付款" sourceRef="Activity_wwa115f" targetRef="Activity_8hy3wi2" />
+    <bpmn2:sequenceFlow id="Flow_ya7sbtf" name="付全款" sourceRef="Activity_iovd6pu" targetRef="Activity_8hy3wi2" />
+    <bpmn2:sequenceFlow id="Flow_4e4pviz" sourceRef="Activity_8hy3wi2" targetRef="Event_k7hgx3k" />
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_03bi9q3">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="60" y="82" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_cyrdoaq_di" bpmnElement="Gateway_cyrdoaq">
+        <dc:Bounds x="260" y="75" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_wwa115f_di" bpmnElement="Activity_wwa115f">
+        <dc:Bounds x="460" y="60" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_iovd6pu_di" bpmnElement="Activity_iovd6pu">
+        <dc:Bounds x="660" y="60" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_8hy3wi2_di" bpmnElement="Activity_8hy3wi2">
+        <dc:Bounds x="860" y="60" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_k7hgx3k_di" bpmnElement="Event_k7hgx3k">
+        <dc:Bounds x="1060" y="82" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_webdof2_di" bpmnElement="Flow_webdof2">
+        <di:waypoint x="96" y="100" />
+        <di:waypoint x="260" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15pwdin_di" bpmnElement="Flow_15pwdin">
+        <di:waypoint x="310" y="100" />
+        <di:waypoint x="460" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_xip0o5a_di" bpmnElement="Flow_xip0o5a">
+        <di:waypoint x="310" y="100" />
+        <di:waypoint x="660" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_cezj97r_di" bpmnElement="Flow_cezj97r">
+        <di:waypoint x="560" y="100" />
+        <di:waypoint x="860" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ya7sbtf_di" bpmnElement="Flow_ya7sbtf">
+        <di:waypoint x="760" y="100" />
+        <di:waypoint x="860" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_4e4pviz_di" bpmnElement="Flow_4e4pviz">
+        <di:waypoint x="960" y="100" />
+        <di:waypoint x="1060" y="100" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>

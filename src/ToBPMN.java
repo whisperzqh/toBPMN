@@ -42,7 +42,7 @@ public class ToBPMN
             Class.forName("org.sqlite.JDBC");
 
             //建立一个数据库名lincj.db的连接，如果不存在就在当前目录下创建之
-//            Connection conn = DriverManager.getConnection("jdbc:sqlite:identifier.sqlite"); 以前的库
+//            Connection conn = DriverManager.getConnection("jdbc:sqlite:identifier.sqlite"); 以前的库work/
             Connection conn = DriverManager.getConnection("jdbc:sqlite:C:/Users/zqh/Desktop/work/final/toBPMN/db.sqlite3");
             //Connection conn = DriverManager.getConnection("jdbc:sqlite:path(路径)/lincj.db");
             Statement stat = conn.createStatement();
@@ -233,7 +233,9 @@ public class ToBPMN
 
                 //如果接收方为空 则接收方为执行方
 //                if(isEmpty(rs.getString("recipient"))){  //0927 判空条件更改
-                if(rs.getString("recipient").equals('-')){
+//                String tmpRecipient = rs.getString("recipient");
+//                System.out.println(newProcess.getTid()+" "+tmpRecipient+" "+tmpRecipient.equals("-"));
+                if(rs.getString("recipient").equals("-")){
                     newProcess.setRecipient(rs.getString("executor"));
                 }
                 else {
@@ -744,7 +746,7 @@ public class ToBPMN
                         int indexP = implementList.get(j).getAction().indexOf('&');
 
                         if(indexE>=0){
-                            actionList = new ArrayList<>(Arrays.asList(implementList.get(j).getAction().split("\\/")));
+                            actionList = new ArrayList<>(Arrays.asList(implementList.get(j).getAction().split("/")));
                         }
                         else if(indexP>=0){
                             actionList = new ArrayList<>(Arrays.asList(implementList.get(j).getAction().split("&")));
@@ -850,7 +852,7 @@ public class ToBPMN
                     indexE = action.indexOf('/');
                     indexP = action.indexOf('&');
                     if(indexE>=0){
-                        list = new ArrayList<>(Arrays.asList(action.split("\\/")));
+                        list = new ArrayList<>(Arrays.asList(action.split("/")));
                     }
                     else if(indexP>=0){
                         list = new ArrayList<>(Arrays.asList(action.split("&")));
@@ -897,7 +899,7 @@ public class ToBPMN
                     for(int h=0;h<list.size();h++){
                         newAction.append(list.get(h));
                         if(h!=list.size()-1)
-                            newAction.append("\\/");
+                            newAction.append("/");
                     }
                 }
                 else if(indexP>0){
